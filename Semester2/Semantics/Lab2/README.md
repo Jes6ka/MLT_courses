@@ -1,4 +1,4 @@
-# Cooper Storage
+# Cooper Storage [Cooper storage for Quantifier Ambiguity]
 ### Reason why we are using this is simple. In order to find "CORE".
 ### For example, John loves cats. We can consider Verb(love) as a core, and write this way
 ### Love(A, B) : A love B or Love(B,A)
@@ -10,3 +10,7 @@
  For example, Every cat chased John and Mery.
  In lab1, it was complex formation but now we can use in one predicate(function)
  Which is  "Chase(STORAGE1, STOARGE2)" where STORAGE1 == every cat, STORAGE2 == John and Mery.
+
+##Reference
+http://www.nltk.org/book_1ed/ch10.html
+https://github.com/nltk/nltk_teach/blob/master/examples/grammars/book_grammars/storage.fcfg
