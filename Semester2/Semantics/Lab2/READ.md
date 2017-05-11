@@ -7,6 +7,6 @@
 ### As we consider former "complex forms" as simple "storage", e,g. STORAGE = [some_complex_combinations_of_functions]
 ### we can treat STORAGE as one elements. All we need to do is just "linking to Storage"
 
-### For example, Every cat chased John and Mery.
-### In lab1, it was complex formation but now we can use in one predicate(function)
-### Which is  "Chase(STORAGE1, STOARGE2)" where STORAGE1 == every cat, STORAGE2 == John and Mery.
+ For example, Every cat chased John and Mery.
+ In lab1, it was complex formation but now we can use in one predicate(function)
+ Which is  "Chase(STORAGE1, STOARGE2)" where STORAGE1 == every cat, STORAGE2 == John and Mery.
