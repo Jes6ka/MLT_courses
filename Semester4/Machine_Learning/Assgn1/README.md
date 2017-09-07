@@ -9,7 +9,7 @@ Make the above file in arff format.
 
 Make ID3 algorithm, since we are handling continous numbers, we need certain point to split and get GAIN from Entropy.
 
-When we are spliting the authors with certain attribute, we can use, random, or some others. 
+When we are spliting the authors with certain attribute, we can use, random, or making gap between min-max of attributes and spliting only 10parts or so.(making 10 classes for one attribute value, e.g., 1-3, 3-5, 5-7, 7-9, ...)
 
 # references
 https://discuss.analyticsvidhya.com/t/decision-tree-with-continuous-variables/201/6
