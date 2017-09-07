@@ -8,6 +8,7 @@ Make the above file in arff format.
 Make ID3 algorithm, since we are handling continous numbers, we need certain point to split and get GAIN from Entropy.
 When we are spliting the authors with certain attribute, we can use, random, or some others, 
 
-##references
+# references
 https://discuss.analyticsvidhya.com/t/decision-tree-with-continuous-variables/201/6
+
 http://support.sas.com/resources/papers/proceedings13/095-2013.pdf
