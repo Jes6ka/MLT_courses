@@ -1,0 +1,52 @@
+--- main menu
+S> Do you want to know the current time or set the time?
+
+--- asking about time
+U> what time is it
+S> 00:00.
+
+--- setting the time (menu driven)
+U> set the time
+S> What hour?
+U> eleven
+S> What minute?
+U> ten
+S> The time was set to 11: 10.
+U>
+S> Returning to the start view. Do you want to know the current time or set the time?
+
+--- retting the time (menu driven)
+U> reset the time
+S> What hour?
+U> eleven
+S> What minute?
+U> ten
+S> The time is reset to 11: 10.
+
+
+--- setting ALARM (menu driven)
+U> set an alarm
+S> What hour?
+U> eleven
+S> What minute?
+U> ten
+S> The arlam is set to 11: 10.
+
+
+--- querying time after setting it
+U> set the time
+S> What hour?
+U> eleven
+S> What minute?
+U> ten
+S> The time was set to 11: 10.
+U>
+S> Returning to the start view. Do you want to know the current time or set the time?
+U> what time is it
+S> 11:10.
+
+--- setting the time, open-shot
+U> set the time to eleven ten
+S> The time was set to 11 10.
+U>
+S> Returning to the start view. Do you want to know the current time or set the time?
