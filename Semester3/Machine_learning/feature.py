@@ -26,6 +26,7 @@ V = 1#len(word_counter)
 A = 0.01
 unseen_word_dict = {}
 word_scale_book_dict = defaultdict(list)
+#defaultdict is not dict, cannot be re-called.
 attr_num = 1
 
 stops = set(stopwords.words('english'))
@@ -56,19 +57,31 @@ def punct_number(sent):
                       # START     Getting attributes       START #
 #########################################################################################
 
-def feature1(word_scale_dict_here):
+def feature1(sent_scale_dict_here):
     """ punct_sentence_ratio  : len(sent)/#_of_punctuation"""
 
     feature1_dict = defaultdict(list)
-    for each_book_name in word_scale_dict_here:
-        for sent in word_scale_dict_here[each_book_name]:
+    for each_book_name in sent_scale_dict_here:
+        for sent in sent_scale_dict_here[each_book_name]:
             print(len(sent), sent,punct_number(sent))
             feature1_dict[each_book_name] = 50*len(sent)/(punct_number(sent)+0.00000001)
     print(feature1_dict)
     return feature1_dict
 
-def feature2():
-    return None
+def feature2(word_scale_book_dict):
+    """ # of long words"""
+
+    feature2_dict = defaultdict(list)
+    for each_book_name in word_scale_book_dict:
+        score = 0
+        for word in word_scale_book_dict[each_book_name]:
+            print(word, len(word))
+            if len(word) >= 4 : score+=1
+        print("score is {0}".format(score))
+        feature2_dict[each_book_name] = score
+
+    return feature2_dict
+
 
 def feature3():
     return None
@@ -105,10 +118,10 @@ class attributes_collection():
 #==========================      RUNNING    ==========================#
 
 if __name__ == "__main__":
-    book_dict = {'a' : ['a b c , . a b a a b a a a,'], 'b' : ['g q we r : ; ,, e']}
+    book_dict = {'a' : ['a b c , . aasd basdasdws abbbb a b a a a,'], 'b' : ['gsswa q we r : ; ,, e']}
     tokenize(book_dict) # save to "word_scale_book_dict"
     feature1 = feature1(book_dict)
-    feature2 = feature1
+    feature2 = feature2(word_scale_book_dict)
     test = attributes_collection()
     test.add(feature1)
     test.add(feature2)
