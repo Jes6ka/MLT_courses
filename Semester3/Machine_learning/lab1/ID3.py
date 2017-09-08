@@ -3,7 +3,35 @@
 #========================== import Module ==========================#
 
 import numpy as np                        # np.log, np.log2
+import pandas as pd
+bins = [0, 4, 10, 30, 45, 99999]
+labels = ['Very_Low_Fare', 'Low_Fare', 'Med_Fare', 'High_Fare','Very_High_Fare']
+train_orig.Fare[:10]
+0     7.2500
+1    71.2833
+2     7.9250
+3    53.1000
+4     8.0500
+5     8.4583
+6    51.8625
+7    21.0750
+8    11.1333
+9    30.0708
 
+pd.cut(train_orig.Fare, bins=bins, labels=labels)[:10]
+
+0          Low_Fare
+1    Very_High_Fare
+2          Low_Fare
+3    Very_High_Fare
+4          Low_Fare
+5          Low_Fare
+6    Very_High_Fare
+7          Med_Fare
+8          Med_Fare
+9         High_Fare
+
+Categories (5, object): [High_Fare < Low_Fare < Med_Fare < Very_High_Fare < Very_Low_Fare]
 
 #scikit-learn
 from sklearn.metrics import confusion_matrix #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
@@ -39,8 +67,8 @@ A = 0.01
 #########################################################################################
 
 #GIVEN DATA : {'author_name':{
-#           	'b': {'attribute2': 1, 'attribute1': 212.49999946875}, 
-#           	'a': {'attribute2': 3, 'attribute1': 433.3333318888889}}}
+#           	'b': {'attribute2': 1, 'attribute1': 1.6332339825135302}, 
+#           	'a': {'attribute2': 3, 'attribute1': 15.085071899340488}}}
 
 
 #Entropy(attribute1) = -(sum(p*m.log(p,2))
