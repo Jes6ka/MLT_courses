@@ -2,13 +2,12 @@
 
 #========================== import Module ==========================#
 
-import numpy as np                        # np.log, np.log2
+
 from collections import Counter
 from collections import defaultdict
 
 #import nltk
 from nltk.corpus import stopwords
-from nltk.probability import FreqDist
 
 #scikit-learn
 from sklearn.metrics import confusion_matrix #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
@@ -128,8 +127,8 @@ if __name__ == "__main__":
     print(vars(test), dir(test))
     
     #output : {'author_name':{
-    #           'b': {'attribute2': 212.49999946875, 'attribute1': 212.49999946875}, 
-    #           'a': {'attribute2': 433.3333318888889, 'attribute1': 433.3333318888889}}}
+    #           'b': {'attribute2': 1, 'attribute1': 212.49999946875}, 
+    #           'a': {'attribute2': 3, 'attribute1': 433.3333318888889}}}
 
 #==========================      RUNNING    ==========================#
 #==========================      RUNNING    ==========================#
