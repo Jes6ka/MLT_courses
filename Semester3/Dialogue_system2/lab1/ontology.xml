@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ontology name="HelloWorldOntology">
+	<sort name="alarm"/>
+  <predicate name="minute_to_set" sort="integer"/>
+  <predicate name="hour_to_set" sort="integer"/>
+
+  <predicate name="current_time" sort="string"/>
+  <predicate name="alarm_time" sort="string"/>
+  <action name="top"/>
+  <action name="set_time"/>
+</ontology>
