@@ -33,8 +33,7 @@ punctuation = ['.', ',', '\/', '\'', '"', '?', '!', '@', '#', '$', '-', '--', '.
 
 #========================== Constant ==========================#
 
-def get_attributes():
-    return None
+
 
 def tokenize(use_book_dict_here):
     global word_scale_book_dict
@@ -50,6 +49,13 @@ def punct_number(sent):
         if word in punctuation: sum+=1
     return sum
 
+
+
+
+#########################################################################################
+                      # START     Getting attributes       START #
+#########################################################################################
+
 def feature1(word_scale_dict_here):
     """ punct_sentence_ratio  : len(sent)/#_of_punctuation"""
 
@@ -61,7 +67,13 @@ def feature1(word_scale_dict_here):
     print(feature1_dict)
     return feature1_dict
 
-    
+def feature2():
+    return None
+
+def feature3():
+    return None
+
+
 class attributes_collection():
     """
     collections of authors + attributes
@@ -85,6 +97,13 @@ class attributes_collection():
     def __str__(self):
         return self.__name__
 
+
+
+
+
+#==========================      RUNNING    ==========================#
+#==========================      RUNNING    ==========================#
+
 if __name__ == "__main__":
     book_dict = {'a' : ['a b c , . a b a a b a a a,'], 'b' : ['g q we r : ; ,, e']}
     tokenize(book_dict) # save to "word_scale_book_dict"
@@ -94,9 +113,10 @@ if __name__ == "__main__":
     test.add(feature1)
     test.add(feature2)
     print(vars(test), dir(test))
+    
+    #output : {'author_name':{
+    #           'b': {'attribute2': 212.49999946875, 'attribute1': 212.49999946875}, 
+    #           'a': {'attribute2': 433.3333318888889, 'attribute1': 433.3333318888889}}}
 
-
-
-    # for book in book_list:
-    #     generate_txt_file_from_gutenberg(book)
-
+#==========================      RUNNING    ==========================#
+#==========================      RUNNING    ==========================#
