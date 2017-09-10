@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<domain name="HelloWorldDomain" is_super_domain="true">
+<!--   Domain is just linking and ordering how system have to behave, shortly, main function. -->
+  <goal type="resolve" question_type="wh_question" predicate="current_time">
+    <plan>
+      <dev_query device="HelloWorldDevice" type="wh_question" predicate="current_time"/><!--device from py, predecate from ontology-->
+    </plan>
+  </goal>
+
+  <goal type="resolve" question_type="wh_question" predicate="alarm_time">
+    <plan>
+      <dev_query device="HelloWorldDevice" type="wh_question" predicate="alarm_time"/><!--device from py, predecate from ontology-->
+    </plan>
+  </goal>
+
+  <goal type="perform" action="top"><!--from ontology.xml----grammar_eng.xml -->
+    <plan>
+      <findout type="alt_question">
+        <alt>
+          <resolve type="wh_question" predicate="current_time"/><!--get from grammar_eng.xml-->
+        </alt>
+        <alt>
+          <perform action="set_time"/><!-- WTF? from domain itself, or grammar_eng, either one of them. -->
+        </alt>
+      </findout>
+    </plan>
+  </goal>
+
+  <goal type="perform" action="set_time"><!-- Most important, using .py function name "perform" and plus, (linking ontology.xml----grammar_eng.xml) -->
+    <plan>
+      <findout type="wh_question" predicate="hour_to_set"/><!-- get from grammar_eng.xml -->
+      <findout type="wh_question" predicate="minute_to_set"/><!-- get from grammar_eng.xml -->
+      <dev_perform action="SetTime" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
+    <!-- in .py, class SetTime(), PARAMETERS = ["hour_to_set", "minute_to_set"] -->
+    </plan>
+    <postcond>
+      <device_activity_terminated action="SetTime"/><!-- from .py -->
+    </postcond>
+    <postplan>
+      <forget predicate="hour_to_set"/>
+      <forget predicate="minute_to_set"/>
+    </postplan>
+  </goal>
+
+  <goal type="perform" action="set_alarm"><!-- Most important, using .py function name "perform" and plus, (linking ontology.xml----grammar_eng.xml) -->
+    <plan>
+      <findout type="wh_question" predicate="hour_to_set"/><!-- from grammar_eng.xml -->
+      <findout type="wh_question" predicate="minute_to_set"/><!-- from grammar_eng.xml -->
+      <dev_perform action="SetAlarm" device="HelloWorldDevice" postconfirm="true"/><!-- get PARAMETERS, hours_to_set, minute_to_set from py , e.g. int 10, 45-->
+    </plan>
+    <postcond>
+      <device_activity_terminated action="SetAlarm"/>
+    </postcond>
+    <postplan>
+      <forget predicate="hour_to_set"/>
+      <forget predicate="minute_to_set"/>
+    </postplan>
+  </goal>
+
+  <goal type="oneshot" action="set_time_oneshot"><!-- Most important, goal type 'oneshot' from py, action 'oneshot' from grammar_eng.xml, but, ontology.xml must define action name. it seems like linking between Python===grammar_eng.xml -->
+    <plan>
+      <dev_perform action="SetTime" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
+    <!-- in .py, class SetTime(), PARAMETERS = ["hour_to_set", "minute_to_set"] -->
+    </plan>
+    <postcond>
+      <device_activity_terminated action="SetTime"/><!-- from .py -->
+    </postcond>
+    <postplan>
+      <forget predicate="hour_to_set"/>
+      <forget predicate="minute_to_set"/>
+    </postplan>
+  </goal>
+
+  <goal type="oneshot" action="set_alarm_oneshot"><!-- Most important, goal type 'oneshot' from py, action 'oneshot' from grammar_eng.xml, but, ontology.xml must define action name. it seems like linking between Python===grammar_eng.xml -->
+    <plan>
+      <dev_perform action="SetAlarm" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
+    <!-- in .py, class SetTime(), PARAMETERS = ["hour_to_set", "minute_to_set"] -->
+    </plan>
+    <postcond>
+      <device_activity_terminated action="SetAlarm"/><!-- from .py -->
+    </postcond>
+    <postplan>
+      <forget predicate="hour_to_set"/>
+      <forget predicate="minute_to_set"/>
+    </postplan>
+  </goal>
+
+</domain>
