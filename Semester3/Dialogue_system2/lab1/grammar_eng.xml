@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <grammar>
-	
-	<question speaker="all" predicate="current_time" type="wh_question">the current time</question>
-	<question speaker="all" predicate="current_time" type="wh_question">the alarm time</question>
-	<!-- regardless of who is speaking, when asking or talking about a question for an argument of "current_time", they can use "the current time". For example, to ask for the current time, the user can say "What is the current time?". When returning to discussing this question (after talking about something else, the system can say "Returning to the issue of the current time") -->
+<question speaker="all" predicate="current_time" type="wh_question">the current time</question>  
+<!-- regardless of who is speaking, when asking or talking about a question for an argument of "current_time", they can use "the current time". For example, to ask for the current time, the user can say "What is the current time?". When returning to discussing this question (after talking about something else, the system can say "Returning to the issue of the current time") -->
 
+<question speaker="user" predicate="current_time" type="wh_question">
+	<one-of>
+		<item>what time is it</item> 
+		<item>the current time</item>
+		<item>what it the current time</item>
+	</one-of>
+</question>
+<!-- this adds an alternative ways for the user to ask about the time, by saying "what time is it" or "what is the current time"-->
 
+<action name="set_time">
+	<one-of>
+		<item>set the time</item>
+		<item>set the clock</item>
+	</one-of>
+</action>
 
-	  <question speaker="user" predicate="current_time" type="wh_question">
-		  <one-of>
-			  <item>what time is it</item> 
-			  <item>the current time</item>
-			  <item>what it the current time</item>
-		  </one-of>
-	  </question>
-	<!-- this adds an alternative ways for the user to ask about the time, by saying "what time is it" or "what is the current time"-->
-	  <question speaker="user" predicate="alarm_time" type="wh_question">
-		  <one-of>
-			  <item>when is the alarm</item> 
-			  <item>the alarm time</item>
-			  <item>alarm time</item>
-		  </one-of>
-	  </question>
-	
-	
-	
-	
-	<action name="set_time">
-		<one-of>
-			<item>set the time</item>
-			<item>set the clock</item>
-		</one-of>
-	</action>
-	<action name="set_alarm">
-		<one-of>
-			<item>set an alarm</item>
-			<item>set the alarm</item>
-			<item>set alarm</item>
-		</one-of>
-	</action>
-	
-	
-    <!-- ADD: <item>set the time to <slot predicate="hour_to_set" type="individual"></slot> <slot predicate="minute_to_set" type="individual"></slot></item> -->
+<action name="set_alarm">
+	<one-of>
+		<item>set alarm</item>
+		<item>set the alarm</item>
+		<item>set an alarm</item>
+	</one-of>
+</action>
 
-      <question speaker="system" predicate="hour_to_set" type="wh_question">what hour</question> 
-	  <question speaker="system" predicate="minute_to_set" type="wh_question">what minute</question> 
-	  
-	  <report action="SetTime" status="ended">the time was set to <slot predicate="hour_to_set" type="individual"></slot>:<slot predicate="minute_to_set" type="individual"></slot>.</report> 
-	
-	
-	
-	<!-- when the system has completed the SetTime action (i.e. its postconditions are fulfilled) the system will report this by saying "The time was set to (hour_to_set) (minute_to_set)" where (hour_to_set) and (minute_to_set) are the arguments of these predicates as stored in the information state (shared.com) and used in executing the command -->
-	
-  <action name="top">
-    <np><indefinite>start view</indefinite></np>
-  </action>
+<action name="set_time_oneshot">
+	<one-of>
+		<item>set the time to</item>
+		<item>set the clock to</item>
+	</one-of>
+</action>
 
-  <action name="up">back</action> 
+<action name="set_alarm_oneshot">
+	<one-of>
+		<item>set alarm to</item>
+		<item>set the alarm to</item>
+		<item>set an alarm to</item>
+	</one-of>
+</action>
+
+<!-- ADD: <item>set the time to <slot predicate="hour_to_set" type="individual"></slot> <slot predicate="minute_to_set" type="individual"></slot></item> -->
+
+<question speaker="system" predicate="hour_to_set" type="wh_question">what hour</question> 
+<!-- same as "what minute" above -->
+<question speaker="system" predicate="minute_to_set" type="wh_question">what minute</question> 
+<!-- this is specific to system utterances. To ask for the minute to set the clock to, the system will ask "What minute?" -->
+
+<report action="SetTime" status="ended">the time was set to <slot predicate="hour_to_set" type="individual"></slot>:<slot predicate="minute_to_set" type="individual"></slot>.</report><!-- This slot predicate from .py, not ontology -->
+<report action="SetAlarm" status="ended">the alarm was set to <slot predicate="hour_to_set" type="individual"></slot>:<slot predicate="minute_to_set" type="individual"></slot>.</report>
+<!-- when the system has completed the SetTime action (i.e. its postconditions are fulfilled) the system will report this by saying "The time was set to (hour_to_set) (minute_to_set)" where (hour_to_set) and (minute_to_set) are the arguments of these predicates as stored in the information state (shared.com) and used in executing the command -->
+
+<action name="top">
+	<np><indefinite>start view</indefinite></np>
+</action>
+
+<action name="up">back</action> 
 <!-- the user can always say "back" to go to to a previous topic (if there is one) -->
-
 
 </grammar>
