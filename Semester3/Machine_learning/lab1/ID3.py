@@ -1,37 +1,15 @@
 # SUNG MIN YANG. Master in Language Technology in Gothenburg University in 2017.
 
+
+
 #========================== import Module ==========================#
+from collections import defaultdict
+import argparse
+import arff #https://pypi.python.org/pypi/liac-arff
 
 import numpy as np                        # np.log, np.log2
+from scipy import stats
 import pandas as pd
-bins = [0, 4, 10, 30, 45, 99999]
-labels = ['Very_Low_Fare', 'Low_Fare', 'Med_Fare', 'High_Fare','Very_High_Fare']
-train_orig.Fare[:10]
-0     7.2500
-1    71.2833
-2     7.9250
-3    53.1000
-4     8.0500
-5     8.4583
-6    51.8625
-7    21.0750
-8    11.1333
-9    30.0708
-
-pd.cut(train_orig.Fare, bins=bins, labels=labels)[:10]
-
-0          Low_Fare
-1    Very_High_Fare
-2          Low_Fare
-3    Very_High_Fare
-4          Low_Fare
-5          Low_Fare
-6    Very_High_Fare
-7          Med_Fare
-8          Med_Fare
-9         High_Fare
-
-Categories (5, object): [High_Fare < Low_Fare < Med_Fare < Very_High_Fare < Very_Low_Fare]
 
 #scikit-learn
 from sklearn.metrics import confusion_matrix #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
@@ -40,17 +18,204 @@ from sklearn.metrics import confusion_matrix #http://scikit-learn.org/stable/mod
 
 
 
+
+
+#========================== Get Arguments ==========================#
+
+parser = argparse.ArgumentParser(description = "Implementing ID3 decision tree algorithm")
+parser.add_argument("train",  type=str, help="input train.arff file" )
+parser.add_argument("tree", type=str, help="input tree.model" )
+parser.add_argument("--prune", default = False , action = "store_true")
+
+args = parser.parse_args()
+#========================== Get Arguments ==========================#
+
+
+
 #========================== Constant ==========================#
 # tag - start symbol 
 start_symbol = "start"
-end_symbol = "end"
-T = 1#len(tag_counter)
-V = 1#len(word_counter)
-A = 0.01
-
+REMOVE_CALSS = 1
+attr_dict = defaultdict(list)
+# For buckets, split point
+LOW  = 10
+MID  = 20
+HIGH = 50
+data = None
 #========================== Constant ==========================#
 
 
+
+
+#==========================      MAIN_START    ==========================#
+#==========================      MAIN_START    ==========================#
+
+def read_arff(file_name):
+	global data
+	data = arff.load(open(file_name, 'r'))# 'rb' is read as binary
+	print(data['data'][:10])
+	return(None)
+
+"""
+arff looks like, aka, the above data looks like
+>>> data
+{
+    u'attributes': [
+        (u'outlook', [u'sunny', u'overcast', u'rainy']),
+        (u'temperature', u'REAL'),
+        (u'humidity', u'REAL'),
+
+    u'data': [
+        [u'sunny', 85.0, 85.0, u'FALSE', u'no'],
+        [u'sunny', 80.0, 90.0, u'TRUE', u'no'],
+        [u'overcast', 83.0, 86.0, u'FALSE', u'yes'],
+        [u'rainy', 70.0, 96.0, u'FALSE', u'yes'],
+        ....
+    ],
+}
+"""
+
+def make_attr_values_dict(raw_data):
+	attr_values_dict = defaultdict(list)
+	for line in raw_data['data']:	#line is [sunny, 85, 53, 2, class1]
+		for n, attr_value in enumerate(line[:-REMOVE_CALSS]):
+			attr_values_dict['attr'+str(n+1)].append(attr_value)
+	print(attr_values_dict.keys(), attr_values_dict['attr1'][:20])
+	# test1 = attr_values_dict['attr2']
+	# test2 = stats.trimboth(test1, 0.1)
+	
+	# print('\n\n', max(test1),	'\n',
+	# 			  min(test1),	'\n',
+	# 			  np.median(test1),'\n',
+	# 			  np.mean(test1),  '\n',
+	# 			  stats.trim_mean(test1, 0.10),  '\n',
+	# 			  np.std(test1, ddof=1),'\n',
+	# 			  stats.kurtosis(test1),'\n',
+	# 			  stats.skew(test1),'\n',
+	# 			  stats.mode(test1),'\n---------\n',
+
+	# 			  max(test2),	'\n',
+	# 			  min(test2),	'\n',
+	# 			  np.median(test2),'\n',
+	# 			  np.mean(test2),  '\n',
+	# 			  stats.trim_mean(test2, 0.10),  '\n',
+	# 			  np.sqrt(np.std(test2, ddof=1)),'\n',
+	# 			  #np.log(np.std(test2, ddof=1)),'\n',
+	# 			  stats.kurtosis(test2),'\n',
+	# 			  stats.skew(test2),'\n',
+	# 			  stats.mode(test2),'\n---------\n',
+	# 			  )
+	return attr_values_dict 			#looks like, {attr1: [22,24,21,23,...], attr2: [1,2,1,1,...]}
+	#works well.
+
+def make_attr_class_dict(raw_data):
+	attr_class_dict = defaultdict(list)
+	for line in raw_data['data']:		#line is [sunny, 85, 53, 2, class1]
+		for n, attr_value in enumerate(line[:-REMOVE_CALSS]):
+			attr_class_dict['attr'+str(n+1)].append((attr_value, line[-1])) #line[-1] is class( author.txt)
+	
+	print(attr_class_dict.keys(), attr_class_dict['attr1'][:10])
+	return attr_class_dict 				#looks like, {attr1: [(22, austen), (13, milton)], attr2 : [(1, austen), (1.3, austen)]}
+
+def make_attr_sp_dict(raw_data):
+	"""Most import part
+			I'm gonna use, median, std.
+			total 6std coveres more than 99.7%
+			from median(M), I will use [M-3sd, M-2sd, M-sd, M-0.5sd, M, M+0.5sd, M+sd, M+2sd, M+3sd]
+			So, total spliting point will be nine.
+	"""
+	attr_sp_dict = defaultdict(list)
+	attr_values_dict = make_attr_values_dict(raw_data) 				#{attr1: [22,24,21,23,...], attr2: [1,2,1,1,...]}
+	
+	for n in range(len(attr_values_dict)): #len(attr_values_dict) is number of attributes.
+			avd = attr_values_dict['attr'+str(n+1)]
+			median  = np.median(avd)
+			tm  = stats.trim_mean(avd, 0.10)
+			sd  = np.std(avd, ddof=1)
+			attr_sp_dict['attr'+str(n+1)].append(median-2*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median-1*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median-0*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median+1*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median+2*sd)  #line[-1] is class( author.txt)
+	
+
+	print('\n\n',attr_sp_dict)
+	return attr_sp_dict 							#looks like, {attr1 : [sp1, sp2, ...sp9]}, attr2 : [sp1,sp2..sp9]
+
+
+def make_split_point(split_number = MID): # let's use stats.trim_mean(x, 0.1) trimming-left-right-10%, total 20% then get mean.
+	global attr_dict
+	split_interval = 0
+	split_point_dict = defaultdict(list)
+	
+	
+	class_index = len(data['data'][0])-remove_class # max-1, it means, removing "Class, Categories, authors"
+
+	for one_line in data['data']:
+		for n, attr_value in enumerate(one_line):
+			if n == class_index : break
+			attr_dict['attr'+str(n)].append(attr_value)
+			# {attr0:[21, 24...], attr1:[0.2, 0.1...], ...attr[n-1] :[9999,9999,9999...]]
+	for each_attr in attr_dict:
+		#print('888888888888888888', np.std(attr_dict[each_attr]), attr_dict[each_attr][:10], type(attr_dict[each_attr][0]))
+		#split_interval = round(np.median(attr_dict[each_attr])/split_number, 3) 	# Median
+		#split_interval = round(stats.mode(attr_dict[each_attr])/split_number, 3) 	# Mode
+		
+		# stats.kurtosis(arr), 3 is twisted, 0 for a normal distribution
+		# stats.kurtosistest(arr), return Z-score & p-value
+		#A z-score equal to 0 represents an element equal to the mean. 
+		#A z-score equal to 1 represents an element that is 1 standard deviation greater than the mean; 
+		#a z-score equal to 2, 2 standard deviations greater than the mean
+
+		# stats.skew(arr), 0 is equal symmetric to axis
+		# stats.skewtest(arr),  return Z-score & p-value
+
+		split_interval = np.std(attr_dict[each_attr], ddof=1)/split_number 	#ddof,  unbiased estimator  (N-1 in the denominator)
+		#print('555555555555', split_interval)
+		# Simply,  interval = max-min/split_number
+		
+		temp = [-float("inf")] # This is because, split point must be unique.
+		for step in range(split_number):
+			print(step, split_number, 'aaaaaaaaaaaaaaaaaaaa', min(attr_dict[each_attr]))
+			temp.append(min(attr_dict[each_attr]) + step*round(split_interval, 3))
+		
+		#split_point must have bigger # than elements, that's why adding +1
+		temp.append(round(max(attr_dict[each_attr])+1, 3))
+		split_point_dict[each_attr].append(temp)
+
+    # Assume, attributes1~3, each attributes has 10classes, total 30
+	print(split_point_dict)
+	return split_point_dict
+	# {attr0 : [sp1, sp2, ...sp20], attr1 :[sp1, sp2, ... sp20] ...]
+	# data[data] : [attr0-value, attr1-value... class]
+    # what i need, {class1 : {attr0 : [22, 32, 19,...], attr1:[ ... ]}, class2 : {attr0 : []} }
+
+def discretize(split_point_list):
+	#split_point_list = [0, 4, 10, 30, 45, 99999], my case # 22 : [ [0, sp1, sp2, ...sp20, sp20+1], [sp1, sp2, ... sp20] ...]
+	#split_point_list(bins) must be one more than the number of Label(bucket_list)
+	discretized_attr_dict = defaultdict(list)
+	bucket_list = []
+	#label = bucket_list
+
+	for i in range(len(split_point_list[0])-1):
+		bucket_list.append('b'+str(i))
+
+	print('\n\nbucket list is ',bucket_list, '\n\n split_point_list', split_point_list)
+	
+	for attr in attr_dict:
+		temp = attr_dict[attr]
+		print('\n\n',temp[:200], type(temp), type(temp[0]),'\n\n')
+		for split_points in split_point_list:
+			discretized_attr_dict[attr].append(pd.cut(temp, bins=split_points, labels=bucket_list))
+			#pd.cut(temp[:20], bins=split_points, labels=bucket_list)
+
+	# {attr0:[21, 24...], attr1:[0.2, 0.1...], ...attr[n-1] :[9999,9999,9999...]]
+	#labels = ['b0', 'b1', 'b2', 'b3','b4' ... 'b18'] #total # is 19
+	# Categories (5, object): [High_Fare < Low_Fare < Med_Fare < Very_High_Fare < Very_Low_Fare]
+	# reference : https://stackoverflow.com/questions/23267767/how-to-do-discretization-of-continuous-attributes-in-sklearn
+
+	print(discretized_attr_dict['attr1'][:20])
+	return discretized_attr_dict
 
 
 
@@ -67,8 +232,8 @@ A = 0.01
 #########################################################################################
 
 #GIVEN DATA : {'author_name':{
-#           	'b': {'attribute2': 1, 'attribute1': 1.6332339825135302}, 
-#           	'a': {'attribute2': 3, 'attribute1': 15.085071899340488}}}
+#           	'b': {'attribute2': 1, 'attribute1': 1.63}, 
+#           	'a': {'attribute2': 3, 'attribute1': 15.08}}}
 
 
 #Entropy(attribute1) = -(sum(p*m.log(p,2))
@@ -109,117 +274,29 @@ A = 0.01
 #   3rd : 1.7<= x <2.4 and so on.
 
 
+def entropy(prob):		#prob : 10/17
+    return(-(p*np.log2(p)+(1-p)*np.log2(1-p)))
 
-def entropy(labels,n=2):
-    if n<=1: n=2#exception, consider bigger than Logorithm 2(in case, channel is bigger than bits)
-    fd=nltk.FreqDist(labels)
-    probs=[fd.freq(a) for a in nltk.FreqDist(labels)]
-    return(-(sum([p*m.log(p,n) for p in probs])))
-
-def gain(gold, file_list(author_list), bp= None):       # bp = bucket point
+def gain(gold, bn= LOW):       # bp = bucket numbers
     # TODO
     # calculate GAIN
-    gain = gold
-    for author in author_list:#file_list
-        gain -= entropy(author)
-    return each_gain_value
-
-def search_best_scope( number_bucket_boundary = 10):
-    """
-    try to find best scope where it gets highest GAIN_VALUE
-    """
-    # Assume, attributes1~3, each attributes has 10classes, total 30
-    n = number_bucket_boundary #let's say we have 10 bucket_boundary. e.g., b1-b10
-
-    for attribute in attribute_list:                     # attribute_list = [attribute1, attribute2...]
-        boundary_range = max(attribute) - min(attribute) # @@TODO value of 
-        bb_list        = boundary_range/n                # bb == bucket boundary
-        
-        for 
-
-        gain(attribute, bp= bb)
-        for bucket in bucket_list:                       #bucket_list = [1, 1.7, 2.4, ... 8] # look line 196
-            for i in range(len(author1.attribute)):      #TODO, have to set&compare bp with given data.
-                if i = 0 :
-                    if author1.attribute1[0] = bucket
-
-# feature =   {'attribute1' : 
-#                     {'author1' : [2,2,3,2,3,1,4,1,2,3] #len == 10
-#                     'author2' : [8,7,5,4,3,6,7]}       #len == 7
+    # gain = gold
+    # for author in author_list:#file_list
+    #     gain -= entropy(author)
+    # return each_gain_value
+    return None
 
 
 
-
-
-
-#########################################################################################
-                        # now, here SVM part to reduce "dimension"
-#########################################################################################
-
-# np.linalg.svd
-# np.linalg.norm() -- cosine distance 
-
-def svd_transform(space, originalnumdimensions,keepnumdimensions):
-    # space is a dictionary mapping words to vectors.
-    # combine those into a big matrix.
-    spacematrix = numpy.empty((len(space.keys()), originalnumdimensions))
-
-    rowlabels = sorted(space.keys())
-
-    for index, word in enumerate(rowlabels):
-        spacematrix[index] = space[word]
-
-    # now do SVD
-    umatrix, sigmavector, vmatrix = numpy.linalg.svd(spacematrix)
-
-    # remove the last few dimensions of u and sigma
-    utrunc = umatrix[:, :keepnumdimensions]
-    sigmatrunc = sigmavector[ :keepnumdimensions]
-
-    # new space: U %matrixproduct% Sigma_as_diagonal_matrix   
-    newspacematrix = numpy.dot(utrunc, numpy.diag(sigmatrunc))
-
-    # transform back to a dictionary mapping words to vectors
-    newspace = { }
-    for index, word in enumerate(rowlabels):
-        newspace[ word ] = newspacematrix[index]
-        
-    return newspace
-
-####
-### run this:
-def test_svdspace():
-    numdims = 100
-    # which words to use as targets and context words?
-    ktw = do_word_count(demo_dir, numdims)
-    # mapping words to an index, which will be their column
-    # in the table of counts
-    wi = make_word_index(ktw)
-    words_in_order = sorted(wi.keys(), key=lambda w:wi[w])
-    
-    print("word index:")
-    for word in words_in_order:
-        print(word, wi[word], end=" ")
-    print("\n")
-
-    space = make_space(demo_dir, wi, numdims)
-    ppmispace = ppmi_transform(space, wi)
-    svdspace = svd_transform(ppmispace, numdims, 5)
-    
-    print("some vectors")
-    for w in words_in_order[:10]:
-        print("--------------", "\n", w)
-        print("raw", space[w])
-        # for the PPMI and SVD spaces, we're rounding to 2 digits after the floating point
-        print("ppmi", numpy.round(ppmispace[w], 2), "\n")
-        print("svd", numpy.round(svdspace[w], 2), "\n")
 
 if __name__ == "__main__":
-    # for book in book_list:
-    #     generate_txt_file_from_gutenberg(book)
-    shuffle_sentence_and_save(args)
+	read_arff(args.train)
+	make_attr_values_dict(data)
+	#make_attr_class_dict(data)
+	make_attr_sp_dict(data)
 
-
+	#split_point_list = make_split_point()
+	#discretize(split_point_list)
 # Pruning part, Reduced Error Pruning
 """ https://www.cs.auckland.ac.nz/~pat/706_98/ln/node90.html
 
