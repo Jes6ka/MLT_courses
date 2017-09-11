@@ -76,6 +76,7 @@ arff looks like, aka, the above data looks like
 """
 
 def make_attr_values_dict(raw_data):
+	""" This is used for making attr_sp_dict, when making split points."""
 	attr_values_dict = defaultdict(list)
 	for line in raw_data['data']:	#line is [sunny, 85, 53, 2, class1]
 		for n, attr_value in enumerate(line[:-REMOVE_CALSS]):
@@ -132,7 +133,7 @@ def make_attr_sp_dict(raw_data):
 			median  = np.median(avd)
 			tm  = stats.trim_mean(avd, 0.10)
 			sd  = np.std(avd, ddof=1)
-			attr_sp_dict['attr'+str(n+1)].append(stats.mode(avd))  #line[-1] is class( author.txt)
+			#attr_sp_dict['attr'+str(n+1)].append(stats.mode(avd))  #line[-1] is class( author.txt)
 			attr_sp_dict['attr'+str(n+1)].append(median-2*sd)  #line[-1] is class( author.txt)
 			attr_sp_dict['attr'+str(n+1)].append(median-1*sd)  #line[-1] is class( author.txt)
 			attr_sp_dict['attr'+str(n+1)].append(median-0*sd)  #line[-1] is class( author.txt)
@@ -156,16 +157,28 @@ def split_small_big(attr_class_dict, attr_sp_dict):
 	for v, c in attr_class_dict['attr1']:
 		classes_dict[c]=[] 	# num_classes = {austen : [], milton : [] ...}
 
-	split_small_big_dict = defaultdict(list)
+	candidate_split_dict = {}
+
+
 	for attr in attr_sp_dict:
+		candidate_split_dict[attr] = defaultdict(dict)
+		
 		for sp in attr_sp_dict[attr]: 	# first : attr1.sp1
+			split_small_big_dict = defaultdict(list)
+			
 			for n, (v, c) in enumerate(attr_class_dict[attr]): # value, class : (22, austen)
 				#I need,  attr1 = [22,austen, Small], [43,milton, Big], ...
 				# split to two part,  attr1.small = [(22,austen, line1), ...], attr1.big = [(43,milton, line2)]
-				if v <= sp : split_small_big_dict[attr]['small'].append(v, c, n+1) 
-				else : split_small_big_dict[attr]['big'].append(v, c, n+1)
+				#print('\n======================\n', n, v, sp)
+				if v <= sp : split_small_big_dict['small'].append((v, c, n+1))
+				else : split_small_big_dict['big'].append((v, c, n+1))
 				#@TODO : get gain from split two lists by using classes.
 				#get_gain(split_small_big_dict)
+			candidate_split_dict[attr]['sp'+str(n+1)] = split_small_big_dict
+			
+			print('this is sp ==========', sp)
+			print('\n======================\n',len(candidate_split_dict[attr]['sp'+str(n+1)]['small']))
+
 
 	return split_small_big_dict			#looks like, {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]
 
@@ -340,9 +353,10 @@ def discretize(split_point_list):
 
 if __name__ == "__main__":
 	read_arff(args.train)
-	make_attr_values_dict(data)
-	#make_attr_class_dict(data)
-	make_attr_sp_dict(data)
+	#make_attr_values_dict(data)
+	attr_class_dict=make_attr_class_dict(data)
+	attr_sp_dict=make_attr_sp_dict(data)
+	split_small_big(attr_class_dict, attr_sp_dict)
 
 	#split_point_list = make_split_point()
 	#discretize(split_point_list)
