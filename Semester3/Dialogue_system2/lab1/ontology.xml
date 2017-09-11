@@ -8,9 +8,13 @@
 
 <predicate name="current_time" sort="string"/>
 <predicate name="alarm_time" sort="string"/>
+<predicate name="current_time_oneshot" sort="string"/>
+<predicate name="alarm_time_oneshot" sort="string"/>
 
 <action name="top"/>
-<action name="set_time"/>set_time_oneshot
-<action name="set_alarm"/>set_alarm_oneshot
+<action name="set_time"/>
+<action name="set_alarm"/>
+<action name="set_time_oneshot"/>
+<action name="set_alarm_oneshot"/>
 
 </ontology>
