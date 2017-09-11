@@ -132,6 +132,7 @@ def make_attr_sp_dict(raw_data):
 			median  = np.median(avd)
 			tm  = stats.trim_mean(avd, 0.10)
 			sd  = np.std(avd, ddof=1)
+			attr_sp_dict['attr'+str(n+1)].append(stats.mode(avd))  #line[-1] is class( author.txt)
 			attr_sp_dict['attr'+str(n+1)].append(median-2*sd)  #line[-1] is class( author.txt)
 			attr_sp_dict['attr'+str(n+1)].append(median-1*sd)  #line[-1] is class( author.txt)
 			attr_sp_dict['attr'+str(n+1)].append(median-0*sd)  #line[-1] is class( author.txt)
@@ -141,6 +142,65 @@ def make_attr_sp_dict(raw_data):
 
 	print('\n\n',attr_sp_dict)
 	return attr_sp_dict 							#looks like, {attr1 : [sp1, sp2, ...sp9]}, attr2 : [sp1,sp2..sp9]
+
+
+def split_small_big(attr_class_dict, attr_sp_dict):
+	"""
+	attr_class_dict : {attr1: [(22, austen), (13, milton)], attr2 : [(1, austen), (1.3, austen)]}
+	attr_sp_dict 	: {attr1 : [sp1, sp2, ...sp9]}, attr2 : [sp1,sp2..sp9]}
+
+	returning
+	attr_gain_dict  : {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]}
+	"""
+	classes_dict = {}
+	for v, c in attr_class_dict['attr1']:
+		classes_dict[c]=[] 	# num_classes = {austen : [], milton : [] ...}
+
+	split_small_big_dict = defaultdict(list)
+	for attr in attr_sp_dict:
+		for sp in attr_sp_dict[attr]: 	# first : attr1.sp1
+			for n, (v, c) in enumerate(attr_class_dict[attr]): # value, class : (22, austen)
+				#I need,  attr1 = [22,austen, Small], [43,milton, Big], ...
+				# split to two part,  attr1.small = [(22,austen, line1), ...], attr1.big = [(43,milton, line2)]
+				if v <= sp : split_small_big_dict[attr]['small'].append(v, c, n+1) 
+				else : split_small_big_dict[attr]['big'].append(v, c, n+1)
+				#@TODO : get gain from split two lists by using classes.
+				#get_gain(split_small_big_dict)
+
+	return split_small_big_dict			#looks like, {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]
+
+	#return attr_gain_dict			#looks like, {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]
+
+
+
+
+
+
+def select_best_gain():
+	return None
+
+def make_node():
+	return None #e.g.,  attr1 <= 423
+
+def split_by_node():
+	return None #should return, two raw_data that split by node.
+
+def entropy(prob):		#prob : 10/17
+    return(-(p*np.log2(p)+(1-p)*np.log2(1-p)))
+
+def gain(gold, bn= LOW):       # bp = bucket numbers
+    # TODO
+    # calculate GAIN
+    # gain = gold
+    # for author in author_list:#file_list
+    #     gain -= entropy(author)
+    # return each_gain_value
+    return None
+
+
+
+
+
 
 
 def make_split_point(split_number = MID): # let's use stats.trim_mean(x, 0.1) trimming-left-right-10%, total 20% then get mean.
@@ -274,17 +334,6 @@ def discretize(split_point_list):
 #   3rd : 1.7<= x <2.4 and so on.
 
 
-def entropy(prob):		#prob : 10/17
-    return(-(p*np.log2(p)+(1-p)*np.log2(1-p)))
-
-def gain(gold, bn= LOW):       # bp = bucket numbers
-    # TODO
-    # calculate GAIN
-    # gain = gold
-    # for author in author_list:#file_list
-    #     gain -= entropy(author)
-    # return each_gain_value
-    return None
 
 
 
