@@ -53,6 +53,10 @@
 <report action="SetAlarm" status="ended">the alarm was set to <slot predicate="hour_to_set" type="individual"></slot>:<slot predicate="minute_to_set" type="individual"></slot>.</report>
 <!-- when the system has completed the SetTime action (i.e. its postconditions are fulfilled) the system will report this by saying "The time was set to (hour_to_set) (minute_to_set)" where (hour_to_set) and (minute_to_set) are the arguments of these predicates as stored in the information state (shared.com) and used in executing the command -->
 
+<report action="SetTimeOneshot" status="ended">the time was set to <slot predicate="hour_to_set" type="individual"></slot>:<slot predicate="minute_to_set" type="individual"></slot>.</report>
+
+<report action="SetAlarmOneshot" status="ended">the time was set to <slot predicate="hour_to_set" type="individual"></slot>:<slot predicate="minute_to_set" type="individual"></slot>.</report>
+
 <action name="top">
 	<np><indefinite>start view</indefinite></np>
 </action>
