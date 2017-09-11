@@ -13,6 +13,19 @@
     </plan>
   </goal>
 
+  <goal type="resolve" question_type="wh_question" predicate="current_time_oneshot">
+    <plan>
+      <dev_query device="HelloWorldDevice" type="wh_question" predicate="current_time_oneshot"/><!--device from py, predecate from ontology-->
+    </plan>
+  </goal>
+
+  <goal type="resolve" question_type="wh_question" predicate="alarm_time_oneshot">
+    <plan>
+      <dev_query device="HelloWorldDevice" type="wh_question" predicate="alarm_time_oneshot"/><!--device from py, predecate from ontology-->
+    </plan>
+  </goal>
+
+
   <goal type="perform" action="top"><!--from ontology.xml----grammar_eng.xml -->
     <plan>
       <findout type="alt_question">
@@ -57,13 +70,15 @@
     </postplan>
   </goal>
 
-  <goal type="oneshot" action="set_time_oneshot"><!-- Most important, goal type 'oneshot' from py, action 'oneshot' from grammar_eng.xml, but, ontology.xml must define action name. it seems like linking between Python===grammar_eng.xml -->
+  <goal type="perform" action="set_time_oneshot"><!-- Most important, goal type 'oneshot' from py, action 'oneshot' from grammar_eng.xml, but, ontology.xml must define action name. it seems like linking between Python===grammar_eng.xml -->
     <plan>
-      <dev_perform action="SetTime" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
+      <findout type="wh_question" predicate="hour_to_set"/><!-- from grammar_eng.xml -->
+      <findout type="wh_question" predicate="minute_to_set"/><!-- from grammar_eng.xml -->
+      <dev_perform action="SetTimeOneshot" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
     <!-- in .py, class SetTime(), PARAMETERS = ["hour_to_set", "minute_to_set"] -->
     </plan>
     <postcond>
-      <device_activity_terminated action="SetTime"/><!-- from .py -->
+      <device_activity_terminated action="SetTimeOneshot"/><!-- from .py -->
     </postcond>
     <postplan>
       <forget predicate="hour_to_set"/>
@@ -71,13 +86,15 @@
     </postplan>
   </goal>
 
-  <goal type="oneshot" action="set_alarm_oneshot"><!-- Most important, goal type 'oneshot' from py, action 'oneshot' from grammar_eng.xml, but, ontology.xml must define action name. it seems like linking between Python===grammar_eng.xml -->
+  <goal type="perform" action="set_alarm_oneshot"><!-- Most important, goal type 'oneshot' from py, action 'oneshot' from grammar_eng.xml, but, ontology.xml must define action name. it seems like linking between Python===grammar_eng.xml -->
     <plan>
-      <dev_perform action="SetAlarm" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
+      <findout type="wh_question" predicate="hour_to_set"/><!-- from grammar_eng.xml -->
+      <findout type="wh_question" predicate="minute_to_set"/><!-- from grammar_eng.xml -->
+      <dev_perform action="SetAlarmOneshot" device="HelloWorldDevice" postconfirm="true"/><!-- dev_perform, device from py-->
     <!-- in .py, class SetTime(), PARAMETERS = ["hour_to_set", "minute_to_set"] -->
     </plan>
     <postcond>
-      <device_activity_terminated action="SetAlarm"/><!-- from .py -->
+      <device_activity_terminated action="SetAlarmOneshot"/><!-- from .py -->
     </postcond>
     <postplan>
       <forget predicate="hour_to_set"/>
