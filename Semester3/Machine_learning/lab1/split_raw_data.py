@@ -15,6 +15,7 @@ def split_raw_data_by_node(raw_data, node):
 	#node = ((attr=2) , (sp3=293))
 	#attr, sp = tuple([int(w[-1])-1 for w in node ])
 	
+	global NODE_COLLECTION
 	NODE_COLLECTION.append(node)
 
 	attr, sp = node 	#attr-1 is necessary. because that's what I defined
