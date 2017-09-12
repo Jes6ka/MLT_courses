@@ -19,3 +19,4 @@ S = np.diag(s)
 
 #obtaining original matrix is important, or how to do dot. product to get useful information.
 #reference : https://stackoverflow.com/questions/31251689/how-to-invert-numpy-matrices-using-singular-value-decomposition
+#https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.linalg.svd.html
