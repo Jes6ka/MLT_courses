@@ -3,6 +3,9 @@
 # then I need (attr2, sp3) tuple first.
 
 # split raw_data -> raw_data1, raw_data2.
+
+NODE_COLLECTION = []
+
 raw_data = {'data' : [[1,2,3],[5,6,7],[8,9,10]]}
 for each_line in raw_data['data']:
     print(each_line)
@@ -11,6 +14,8 @@ from collections import defaultdict
 def split_raw_data_by_node(raw_data, node):
 	#node = ((attr=2) , (sp3=293))
 	#attr, sp = tuple([int(w[-1])-1 for w in node ])
+	
+	NODE_COLLECTION.append(node)
 
 	attr, sp = node 	#attr-1 is necessary. because that's what I defined
 	attr-=1
