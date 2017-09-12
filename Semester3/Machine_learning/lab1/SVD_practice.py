@@ -16,3 +16,6 @@ S = np.diag(s)
 #       [  0.00000000e+00,   0.00000000e+00,   4.41842475e-16]])
 
 #s[0] is most informative? value
+
+#obtaining original matrix is important, or how to do dot. product to get useful information.
+#reference : https://stackoverflow.com/questions/31251689/how-to-invert-numpy-matrices-using-singular-value-decomposition
