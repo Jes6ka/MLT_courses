@@ -46,3 +46,30 @@ defaultdict(<class 'list'>,
  """
 
 #so, now have to put raw_data1, raw_data2 as if raw_data
+
+
+
+
+
+######### =============== Recursion Part =======================
+#import sys
+#sys.setrecursionlimit(1500)
+
+raw = [[1, 2, 3, 4, 5, 6, 7, 8], [9, 10, 11, 12, 13,14,15,16]]
+
+def funn(x):
+    temp =[]
+    for line in x:
+        if len(line) == 1 : return x
+        temp.append(line[:int(len(line)/2)])
+        temp.append(line[int(len(line)/2):])
+    print(temp)
+    return funn(temp)
+
+#print('here is aa:',aa)
+#aa = funn(raw)
+#[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+#[[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16]]
+#[[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16]]
+#here is aa: [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16]]
+
