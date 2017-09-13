@@ -5,3 +5,4 @@
 
 My code will be running under :
 >python prepro.py austen-persuasion.txt milton-paradise.txt --test test.arff --train train.arff --testpercent 20
+>python ID3.py test.arff test.tree
