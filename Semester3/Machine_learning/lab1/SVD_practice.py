@@ -54,18 +54,19 @@ def make_sent_voca_matrix(file):
 
 #add this when defining features(Matrix-SVD)
 
-
-wv = ['a','b','c','d','e','f']
+wv = ['a','b','c','d','e','f','g','h','k','l']
 sv1 = ['a','a','c']
-sv2 = ['b','d','e']
-sents = [sv1, sv2]
+sv2 = ['b','d','c']
+sv3 = ['d', 'f', 'l']
+sents = [sv1, sv2, sv3]
 
 col = len(wv)
 whole_voca = []
-each_sent_voca = [0]*col
+
 
 for sent in sents:
-    for ev in sv1:
+    each_sent_voca = [0]*col
+    for ev in sent:
         print(ev, wv, wv.index(ev))
         if ev in wv : each_sent_voca[wv.index(ev)]+=1
     whole_voca.append(each_sent_voca)
