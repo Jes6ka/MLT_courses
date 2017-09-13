@@ -3,10 +3,13 @@
 
 
 #========================== import Module ==========================#
+import collections
 from collections import defaultdict
 import argparse
 import arff #https://pypi.python.org/pypi/liac-arff
+import copy
 
+import math
 import numpy as np                        # np.log, np.log2
 from scipy import stats
 import pandas as pd
@@ -42,6 +45,7 @@ LOW  = 10
 MID  = 20
 HIGH = 50
 data = None
+nan = float('nan')
 #========================== Constant ==========================#
 
 
@@ -134,11 +138,11 @@ def make_attr_sp_dict(raw_data):
 			tm  = stats.trim_mean(avd, 0.10)
 			sd  = np.std(avd, ddof=1)
 			#attr_sp_dict['attr'+str(n+1)].append(stats.mode(avd))  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(median-2*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(median-1*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(median-0*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(median+1*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(median+2*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(tm-0.5*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(tm-0.2*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(tm-0*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(tm+0.2*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(tm+0.5*sd)  #line[-1] is class( author.txt)
 	
 
 	print('\n\n',attr_sp_dict)
@@ -150,44 +154,135 @@ def split_small_big(attr_class_dict, attr_sp_dict):
 	attr_class_dict : {attr1: [(22, austen), (13, milton)], attr2 : [(1, austen), (1.3, austen)]}
 	attr_sp_dict 	: {attr1 : [sp1, sp2, ...sp9]}, attr2 : [sp1,sp2..sp9]}
 
-	returning
-	attr_gain_dict  : {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]}
+	return
+	candidate_group_dict  : {attr1 : { sp1 : {small : [(value, austen, line0), (v,c,l)...], 
+												big : [(value, austen, line)]}
+							attr2 : { sp2 : {small :  ...}
 	"""
 	classes_dict = {}
 	for v, c in attr_class_dict['attr1']:
 		classes_dict[c]=[] 	# num_classes = {austen : [], milton : [] ...}
 
-	candidate_split_dict = {}
+	candidate_group_dict = {}
 
 
 	for attr in attr_sp_dict:
-		candidate_split_dict[attr] = defaultdict(dict)
+		candidate_group_dict[attr] = defaultdict(dict)
 		
-		for sp in attr_sp_dict[attr]: 	# first : attr1.sp1
+		for m, sp in enumerate(attr_sp_dict[attr]): 	# first : attr1.sp1
 			split_small_big_dict = defaultdict(list)
-			
+
 			for n, (v, c) in enumerate(attr_class_dict[attr]): # value, class : (22, austen)
 				#I need,  attr1 = [22,austen, Small], [43,milton, Big], ...
 				# split to two part,  attr1.small = [(22,austen, line1), ...], attr1.big = [(43,milton, line2)]
 				#print('\n======================\n', n, v, sp)
-				if v <= sp : split_small_big_dict['small'].append((v, c, n+1))
-				else : split_small_big_dict['big'].append((v, c, n+1))
+				if split_small_big_dict == defaultdict(list): 		#This is for smoothing. for line around #222
+					split_small_big_dict['small'].append(('value', c, -1))
+					split_small_big_dict['big'].append(('value', c, -1))
+
+				if v <= sp : split_small_big_dict['small'].append((v, c, n))
+				else : split_small_big_dict['big'].append((v, c, n))
 				#@TODO : get gain from split two lists by using classes.
 				#get_gain(split_small_big_dict)
-			candidate_split_dict[attr]['sp'+str(n+1)] = split_small_big_dict
+			candidate_group_dict[attr]['sp'+str(m+1)] = split_small_big_dict
 			
-			print('this is sp ==========', sp)
-			print('\n======================\n',len(candidate_split_dict[attr]['sp'+str(n+1)]['small']))
+			#print('this is sp ==========', sp)
+			#print('\n======================\n',len(candidate_group_dict[attr]['sp'+str(n+1)]['small']))
 
 
-	return split_small_big_dict			#looks like, {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]
+	return candidate_group_dict			#looks like, {attr1 : { sp1 : {small : [(value, austen, line0), (v,c,l)...], big : [(value, austen, line)]}
+										# 			  attr2 : { sp2 : {small :  ...}
 
 	#return attr_gain_dict			#looks like, {attr1_gain : [.5, .4, ..., .7]}, attr2_gain : [0.2, 0.3, ...]
 
 
 
+def fitting_data(candidate_group_dict):
+	"""
+	candidate_group_dict  : {attr1 : { sp1 : {small : [(value, austen, line0), (v,c,l)...], 
+												big : [(value, austen, line)]}
+							attr2 : { sp2 : {small :  ...}
+	return
+	fit_data_dict = {'attr1': 
+					{'sp1': 
+						{'austen': {'small': 23, 'big': 402},
+						'milton': {'small': 52, 'big': 387}   }
+		}
+	"""
+	cgd = copy.deepcopy(candidate_group_dict)
+	#temp2 = []
+	temp3 = []
+	fit_data_dict = {}
+
+	#get class list, e.g., austen, milton, ...
+	class_list = []
+	for sp in cgd['attr1']:
+		class_list = list(set([c for small_or_big in cgd['attr1'][sp] for v, c, l in cgd['attr1'][sp][small_or_big]]))
+	
+	for attr in cgd:
+		fit_data_dict[attr]={}
+		for sp in cgd[attr]:
+			#print('=========calc gain ===========',cgd[attr].keys())
+			#print('=========calc gain ===========',sp)
+			fit_data_dict[attr][sp]={}
+			
+			for small_or_big in cgd[attr][sp]:
+				temp1 = []
+				#print('=========calc gain ===========',small_or_big)
+				
+				for v,c,l in cgd[attr][sp][small_or_big]:
+					temp1.append(c)
+					#temp2.append((c,l))
+				freq_groupy_by_class = dict(collections.Counter(temp1+class_list))# smoothing. by plus class_list, removing zero value.
+				#freq_groupy_by_class = {austen : 2342, milto : 1123}
+
+				for class_ in freq_groupy_by_class:
+					#print(attr, sp, class_, small_or_big, freq_groupy_by_class, freq_groupy_by_class[class_])
+					try : fit_data_dict[attr][sp][class_][small_or_big] = freq_groupy_by_class[class_]
+					except: 
+						fit_data_dict[attr][sp][class_] = {}
+						fit_data_dict[attr][sp][class_][small_or_big] = freq_groupy_by_class[class_]
+
+				temp3.append( (attr, sp, small_or_big, freq_groupy_by_class )   ) 
+	
+	#temp3 = [(attr1, sp1, big, {austen : 2996, milton : 1479}), (attr1, sp2, small, {austen : 232, milton : 4053}) ]
+	#print('\n=========calc gain ===========',fit_data_dict , '\n')
+    #Now, let's calculate GAIN
+		#        two split raw_data 1 									split raw_data 2
+      	#[u'sunny', 85.0, 85.0, u'FALSE', u'no'],   	[u'sunny', 85.0, 85.0, u'FALSE', u'no'],
+        #[u'sunny', 80.0, 90.0, u'TRUE', u'no'],		[u'sunny', 85.0, 85.0, u'FALSE', u'no'],
+	return fit_data_dict
 
 
+def choose_best_gain(fit_data_dict):
+	"""
+	fit_data_dict :	fit_data_dict
+	[{'austen': {'small': 23, 'big': 402}, 
+	 'milton': {'small': 52, 'big': 387},
+	  other_author : {small...			}	}    ]
+
+	return
+	each_gain = -0.87
+	"""
+	gain_list = []
+	
+	for attr in fit_data_dict:
+		for sp in fit_data_dict[attr]:
+			sob_group_by_class_list = [] #small or big by class count list. 
+			for c in fit_data_dict[attr][sp]:
+				sob_group_by_class_list.append(tuple(fit_data_dict[attr][sp][c].values()))
+				#sob_group_by_class_list : [(23, 402), (52, 387), ... (author_n_small, author_n_big)]
+			
+			#each_gain_list : [(att1, sp1, 0.22), (attr1, sp2, 0.01) ...]
+			gain_list.append( (attr, sp, gain_calculate(sob_group_by_class_list)  )     )           
+	
+
+	best_gain = max(gain_list)
+	fit_data_dict
+	print('This is all_gain : ', gain_list, '\n This is best gain', best_gain)
+	print('This is fit_data_dict : ', fit_data_dict['attr3']['sp5'])
+
+	return best_gain
 
 def select_best_gain():
 	return None
@@ -198,19 +293,52 @@ def make_node():
 def split_by_node():
 	return None #should return, two raw_data that split by node.
 
-def entropy(prob):		#prob : 10/17
-    return(-(p*np.log2(p)+(1-p)*np.log2(1-p)))
+def entropy(p):
+	calc = p*np.log2(p)+(1-p)*np.log2(1-p)
+	return(-calc)
 
-def gain(gold, bn= LOW):       # bp = bucket numbers
-    # TODO
-    # calculate GAIN
-    # gain = gold
-    # for author in author_list:#file_list
-    #     gain -= entropy(author)
-    # return each_gain_value
-    return None
+def gain_calculate(sob_group_by_class_list): # [(23, 402), (52, 387), ... (author_n_small, author_n_big)]
+	"""
+	milton : 1479	austen : 2998
+	case for Attr1, sp3
+	Small 	= 		M : 466		A : 1776
+	Big 	= 		M : 1015	A : 1224
 
+	1.Entropy(M.small+A.small/M.small+M.big+A.small+A.big) = entropy(2242/4481) = 0.999
+	2.Entropy(M.small/M.small + M.big) = entropy(466/1481) = 0.898
+	3.Entropy(A.small/A.small+A.big) = entropy(1775/3000) = 0.976
 
+	Gain = 1-(2+3) = 0.999-(0.898+0.976) = -0.875
+	"""
+	print('========CHECK=========', sob_group_by_class_list)
+	total_small = 0
+	total_big 	= 0
+	sum_each_prob_entropy = 0
+
+	for small_v, big_v in sob_group_by_class_list:
+		if small_v <= 2 or big_v <=2 : 
+			total_small, total_big, sum_each_prob_entropy = 2,1,99
+			continue
+		if small_v <= big_v:
+			print('===s,b,entrop1===', small_v, big_v, entropy(small_v/(small_v+big_v)))
+			sum_each_prob_entropy += entropy(small_v/(small_v+big_v))
+			total_small += small_v
+			total_big 	+= big_v
+		else : 
+			print('===s,b,entrop2===', small_v, big_v, entropy(big_v/(small_v+big_v)))
+			sum_each_prob_entropy += entropy(big_v/(small_v+big_v))
+			total_small += big_v
+			total_big 	+= small_v
+
+	#Now, calculate real IG(Information Gain)
+	
+	IG = entropy(total_small/total_big)- sum_each_prob_entropy
+	print('head entropy is',entropy(total_small/total_big))
+	print('IG is',IG)
+	if math.isnan(IG):
+		print('this is nan')
+		return(-99)
+	else :	return(IG)
 
 
 
@@ -326,16 +454,16 @@ def discretize(split_point_list):
 #-(9/17*m.log(9/17, 2) + 8/17*m.log(8/17, 2)) == 0.9975025463691153 # entropy increased.
 
 #if 4 is split point
-#Gain = -0.08
+#Gain = -0.23
 #Gain(attribute1, splitpoint_4) = Entropy(attribute1)__gold_stand - Entropy(attribute1_category1(author1)) - Entropy(attribute1_category2(author2)) 
-#Entropy(attribute1)__gold_stand        = -(10/17*m.log(10/17, 2) + 7/17*m.log(7/17, 2)) = 0.98
+#Entropy(attribute1)__gold_stand        = -( 15/17*m.log(15/17, 2) + 2/17*m.log(2/17, 2)) = 0.83
 #Entropy(attribute1_category1(author1)) = -(9/10*m.log(9/10, 2)   + 1/10*m.log(1/10, 2)) = 0.47
 #Entropy(attribute1_category1(author1)) = -(6/7*m.log(6/7, 2)     + 1/7*m.log(1/7, 2))   = 0.59
 
 #if 2 is splitint point,
-#Gain =  1 -(2+3) = 0.26
+#Gain =  1 -(2+3) = 0.28
 #Gain(attribute1, splitpoint_4) = Entropy(attribute1)__gold_stand - Entropy(attribute1_category1(author1)) - Entropy(attribute1_category2(author2)) 
-#1.Entropy(attribute1)__gold_stand        = -(10/17*m.log(10/17, 2) + 7/17*m.log(7/17, 2)) = 0.98
+#1.Entropy(attribute1)__gold_stand        = -(9/17*m.log(10/17, 2) + 8/17*m.log(7/17, 2)) = 1.0
 #2.Entropy(attribute1_category1(author1)) = -(2/10*m.log(2/10, 2)   + 8/10*m.log(8/10, 2)) = 0.72
 #3.Entropy(attribute1_category2(author2)) = -(7/7*m.log(7/7, 2)     + 0/7*m.log(0/7, 2))   = 0
 
@@ -354,10 +482,11 @@ def discretize(split_point_list):
 if __name__ == "__main__":
 	read_arff(args.train)
 	#make_attr_values_dict(data)
-	attr_class_dict=make_attr_class_dict(data)
-	attr_sp_dict=make_attr_sp_dict(data)
-	split_small_big(attr_class_dict, attr_sp_dict)
-
+	attr_class_dict 		= make_attr_class_dict(data)
+	attr_sp_dict 			= make_attr_sp_dict(data)
+	candidate_group_dict	= split_small_big(attr_class_dict, attr_sp_dict)
+	fit_data_dict			= fitting_data(candidate_group_dict)
+	choose_best_gain(fit_data_dict)
 	#split_point_list = make_split_point()
 	#discretize(split_point_list)
 # Pruning part, Reduced Error Pruning
