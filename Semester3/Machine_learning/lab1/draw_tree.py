@@ -33,17 +33,17 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
             print("QuQUQU")
             fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = "ghost")
         print(Master, '->kk ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master=Master-1,Slave= Slave+1, Last_Slave = "ghost")
         
     if nat[Master][1]=="terminal":
             
         print(Master, '->ee ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = nat[Slave][1])
 
         print(Master, '->dd ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master=Master-1, Slave=Slave+1, Last_Slave = nat[Slave][1])
     
     if nat[Slave][1] == "node" :
@@ -51,11 +51,11 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
         if nat[Master][2] == 3: 
 
             print(Master, '->aa ', Slave,nat[Master], nat[Slave])
-            linking_tree_leaf_list.append(Master, Slave])
+            linking_tree_leaf_list.append([Master, Slave])
             fill_nodes(Master=Master-1, Slave = Slave, Last_Slave = nat[Slave][1])
 
         print(Master, '->bb ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master = Slave, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
     else : 
@@ -63,7 +63,7 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
             fill_nodes(Master=Master-1, Slave=Slave, Last_Slave = nat[Slave][1])
             
         print(Master, '->cc ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master = Master, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
 print(nat)
@@ -192,9 +192,9 @@ node_collection2 = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('attr2', 'sp2', 2.5888773127155993, 8),
                    ('attr3', 'terminal', 3.7949417141146546, 9),
                    ('terminal', 'terminal', -7777, 10)]
-
+#MOM = Master_of_Master = 0
+#Master, Slave = int(), int()
 linking_tree_leaf_list = []
-
 nat = Node_and_Terminal = []
 already_used = 0
 for attr, sp, sp_v, n_o in node_collection:
@@ -208,13 +208,12 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
     
     if Last_Slave == "terminal" and nat[Slave][1] == "terminal":
         print(Master, '->kk ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master=Master-1,Slave= Slave+1, Last_Slave = "ghost")
         
     if nat[Master][1]=="terminal":
     
         #print(Master, '->ee ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
         fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = nat[Slave][1])
 
     if nat[Slave][1] == "node" :
@@ -225,7 +224,7 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
             fill_nodes(Master=Master-1, Slave = Slave, Last_Slave = nat[Slave][1])
 
         print(Master, '->bb ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master = Slave, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
     else : 
@@ -233,9 +232,10 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
             fill_nodes(Master=Master-1, Slave=Slave, Last_Slave = nat[Slave][1])
             
         print(Master, '->cc ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append(Master, Slave])
+        linking_tree_leaf_list.append([Master, Slave])
         fill_nodes(Master = Master, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
 print(nat)
 try : fill_nodes()
 except : pass
+print(linking_tree_leaf_list)
