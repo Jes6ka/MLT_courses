@@ -46,7 +46,7 @@ HIGH = 50
 data = None
 nan = float('nan')
 node_collection = list()
-t1,t2,t3 = 0,0,0
+t1,t2,t3 = 0,0,-1
 #========================== Constant ==========================#
 
 
@@ -362,48 +362,93 @@ def split_in_all_in_one(raw_data):
 	attr, sp, sp_v, IG = choose_best_gain(fit_data_dict, attr_sp_dict_global)
 
 	left_right_groups = test_split(attr, sp_v, raw_data)
-	node_collection.append((t1, t2, attr, sp, sp_v))
+	node_collection.append((attr, sp, sp_v, t3+1))
 	print("all in one split is succussful")
-	return {'index':attr, 'value':sp_v, 'groups':left_right_groups} 
+	return {'index':attr, 'value':sp_v, 'groups':left_right_groups, 'stamp' : 0} 
 
 def to_terminal(group):
-    outcomes = [row[-1] for row in group]
+	outcomes = [row[-1] for row in group]
     #print(outcomes, max(outcomes, key=outcomes.count))
-    return max(set(outcomes), key=outcomes.count)
+	return {'most_common' : max(set(outcomes), key=outcomes.count), 'stamp' : t3}
 def split(node, max_depth, min_size, depth):
 	global t1,t2,t3
 	#print('this is groups   ',node['groups'])
 	left, right = node['groups']
+	t3+=1
+	node['stamp'] = t3
+	#t3+=1
 	#print("Left ===========",left[:5])
 	del(node['groups'])
 	# check for a no split
 	if not left or not right:
 		node['left'] = node['right'] = to_terminal(left + right)
+		t3+=1
 		return
 	# check for max depth
 	if depth >= max_depth:
 		node['left'], node['right'] = to_terminal(left), to_terminal(right)
+		t3+=1
 		return
 	# process left child
 	if len(left) <= min_size:
 		node['left'] = to_terminal(left)
+		t3+=1
 	else:
-		t1+=1
 		node['left'] = split_in_all_in_one(left)
 		split(node['left'], max_depth, min_size, depth+1)
 	# process right child
 	if len(right) <= min_size:
 		node['right'] = to_terminal(right)
+		t3+=1
 	else:
-		t2+=1
 		node['right'] = split_in_all_in_one(right)
 		split(node['right'], max_depth, min_size, depth+1)
 
 def build_tree(train, max_depth, min_size):
 	root = split_in_all_in_one(train)
 	split(root, max_depth, min_size, 1)
-	print(len(root), '\n\n', root['left']['left'], '\n\n', root['right'])
+	print(len(root), '\n\n', root,
+					 '\n\n', root['stamp'], root['index'],  root['value'],		#0
+					 '\n\n', root['left']['stamp'], root['left']['index'],root['left']['value'],			#1
+					 '\n\n', root['right']['stamp'],root['right']['index'],root['right']['value'],			#7
+					 '\n\n', root['left']['left']['stamp'],		#2
+					 '\n\n', root['left']['right']['stamp'],	#4
+					 '\n\n', root['right']['left']['stamp'],	#8
+					 '\n\n', root['right']['right']['stamp'],	#11
+					 '\n\n', root['left']['left']['left']['stamp'],		#3
+					 '\n\n', root['left']['left']['right']['stamp'],	#3
+					 '\n\n', root['left']['right']['left']['stamp'],	#5
+					 '\n\n', root['left']['right']['right']['stamp'],	#6
+					 '\n\n', root['right']['left']['left']['stamp'],		#9
+					 '\n\n', root['right']['left']['right']['stamp'],	#10
+					 '\n\n', root['right']['right']['left']['stamp'],	#12
+					 '\n\n', root['right']['right']['right']['stamp'],	#13
+
+					 '\n\n--==--', root['left']['right']['right']['left']['stamp'],	#??
+					 '\n\n--==--', root['left']['right']['right']['right']['stamp'],
+
+					 # '\n\n--==--', root['left']['left']['right']['left']['stamp'],	#??
+					 # '\n\n--==--', root['left']['left']['right']['right']['stamp']
+					 )	
+	# 0 -> 1, 6 	1 -> 2, 4 		6 -> 7, 9
+	stamp = root['stamp']
+	print('initial stamp : ',stamp)
+	print(print_recursive_stamp(root))
+
 	return root
+
+def print_recursive_stamp(root, K=list()):
+	K.append(root['stamp'])
+	print('-- one left_or_right is over ---')
+	for left_or_right in ['left', 'right']:
+		if not isinstance(root[left_or_right], int): continue
+		else : return K
+		#K.append(root[left_or_right]['stamp'])
+		print('----root[left_or_right]----', root[left_or_right]['stamp'], '\n')
+		print('-- one left_or_right is over ---')
+		print_recursive_stamp(root[left_or_right])
+
+
 def print_tree(node, depth=0):
 	if isinstance(node, dict):
 		print('%s[X%d < %.3f]' % ((depth*' ', (node['index']+1), node['value'])))
@@ -411,11 +456,11 @@ def print_tree(node, depth=0):
 		print_tree(node['right'], depth+1)
 	else:
 		print('%s[%s]' % ((depth*' ', node)))
-def recursive_split(raw_data,best_gain):
+def collect_stamp_order():
+	return None
 
-	return recursive_split(raw_data_left)
-	return recursive_split(raw_data_right) #e.g.,  attr1 <= 423
-
+def make_tree(stamp_order, node_collection):
+	return None
 
 
 # ID3 part,
@@ -481,9 +526,11 @@ if __name__ == "__main__":
 	read_arff(args.train)
 	#make_attr_values_dict(data)
 	#split_in_all_in_one(data)
-	tree = build_tree(data, 5, 20)
+	tree = build_tree(data, 4, 20)
+	
 	print(node_collection)
-	print(len(node_collection))
+	#print(len(node_collection))
+	
 	#print_tree(tree)
 	#split_point_list = make_split_point()
 	#discretize(split_point_list)
