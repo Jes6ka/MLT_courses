@@ -47,6 +47,7 @@ data = None
 nan = float('nan')
 node_collection = list()
 t1,t2,t3 = 0,0,-1
+g_attr, g_sp, g_sp_v, g_IG = str(), str(), int(), int()
 #========================== Constant ==========================#
 
 
@@ -352,8 +353,35 @@ def test_split(index_attr, value_split_point, raw_data):
     return left, right
 
 def split_in_all_in_one(raw_data):
-	global node_collection
+	global node_collection, g_attr, g_sp, g_sp_v, g_IG
 	b_index, b_value, b_score, b_groups = 2, 99999, 7777, None
+
+	attr_class_dict 					= make_attr_class_dict(raw_data)
+	attr_sp_dict, attr_sp_dict_global	= make_attr_sp_dict(raw_data)
+	candidate_group_dict				= split_small_big(attr_class_dict, attr_sp_dict)
+	fit_data_dict						= fitting_data(candidate_group_dict)
+	g_attr, g_sp, g_sp_v, g_IG = choose_best_gain(fit_data_dict, attr_sp_dict_global)
+
+	left_right_groups = test_split(g_attr, g_sp_v, raw_data)
+	node_collection.append((g_attr, g_sp, g_sp_v, t3+1))
+	print("all in one split is succussful")
+	return {'index':g_attr, 'value':g_sp_v, 'groups':left_right_groups, 'stamp' : 0} 
+
+def to_terminal(group):
+	global t3, node_collection
+	t3+=1
+	#if not node_colletor : node_collection.append((attr, sp, sp_v, t3+1))
+	outcomes = [row[-1] for row in group]
+	node_collection.append(('terminal', 'terminal', -7777, t3))
+	print("-=-=-=-to_terminal-=-=-=-=location: ", len(node_collection), 'node order', t3)
+    #print(outcomes, max(outcomes, key=outcomes.count))
+	return {'most_common' : max(set(outcomes), key=outcomes.count), 'stamp' : t3}
+
+def to_terminal2(raw_data):
+	global t3, node_collection
+	t3+=1
+	#if not node_colletor : node_collection.append((attr, sp, sp_v, t3+1))
+	outcomes = [row[-1] for row in raw_data]
 
 	attr_class_dict 					= make_attr_class_dict(raw_data)
 	attr_sp_dict, attr_sp_dict_global	= make_attr_sp_dict(raw_data)
@@ -361,15 +389,9 @@ def split_in_all_in_one(raw_data):
 	fit_data_dict						= fitting_data(candidate_group_dict)
 	attr, sp, sp_v, IG = choose_best_gain(fit_data_dict, attr_sp_dict_global)
 
-	left_right_groups = test_split(attr, sp_v, raw_data)
-	node_collection.append((attr, sp, sp_v, t3+1))
-	print("all in one split is succussful")
-	return {'index':attr, 'value':sp_v, 'groups':left_right_groups, 'stamp' : 0} 
-
-def to_terminal(group):
-	outcomes = [row[-1] for row in group]
-    #print(outcomes, max(outcomes, key=outcomes.count))
+	
 	return {'most_common' : max(set(outcomes), key=outcomes.count), 'stamp' : t3}
+
 def split(node, max_depth, min_size, depth):
 	global t1,t2,t3
 	#print('this is groups   ',node['groups'])
@@ -382,24 +404,20 @@ def split(node, max_depth, min_size, depth):
 	# check for a no split
 	if not left or not right:
 		node['left'] = node['right'] = to_terminal(left + right)
-		t3+=1
 		return
 	# check for max depth
 	if depth >= max_depth:
 		node['left'], node['right'] = to_terminal(left), to_terminal(right)
-		t3+=1
 		return
 	# process left child
 	if len(left) <= min_size:
 		node['left'] = to_terminal(left)
-		t3+=1
 	else:
 		node['left'] = split_in_all_in_one(left)
 		split(node['left'], max_depth, min_size, depth+1)
 	# process right child
 	if len(right) <= min_size:
 		node['right'] = to_terminal(right)
-		t3+=1
 	else:
 		node['right'] = split_in_all_in_one(right)
 		split(node['right'], max_depth, min_size, depth+1)
@@ -413,27 +431,27 @@ def build_tree(train, max_depth, min_size):
 					 '\n\n', root['right']['stamp'],root['right']['index'],root['right']['value'],			#7
 					 '\n\n', root['left']['left']['stamp'],		#2
 					 '\n\n', root['left']['right']['stamp'],	#4
-					 '\n\n', root['right']['left']['stamp'],	#8
-					 '\n\n', root['right']['right']['stamp'],	#11
-					 '\n\n', root['left']['left']['left']['stamp'],		#3
-					 '\n\n', root['left']['left']['right']['stamp'],	#3
-					 '\n\n', root['left']['right']['left']['stamp'],	#5
-					 '\n\n', root['left']['right']['right']['stamp'],	#6
-					 '\n\n', root['right']['left']['left']['stamp'],		#9
-					 '\n\n', root['right']['left']['right']['stamp'],	#10
-					 '\n\n', root['right']['right']['left']['stamp'],	#12
-					 '\n\n', root['right']['right']['right']['stamp'],	#13
+					 '\n\n', root['right']['left']['stamp'],	root['right']['left'],		#8
+					 '\n\n', root['right']['right']['stamp'],	root['right']['right'],		#11
+					 # '\n\n', root['left']['left']['left']['stamp'],	root['left']['left']['left'],	#3
+					 # '\n\n', root['left']['left']['right']['stamp'], root['left']['left']['right'],	#3
+					 # '\n\n', root['left']['right']['left']['stamp'],	root['left']['right']['left'],	#5
+					 # '\n\n', root['left']['right']['right']['stamp'],	root['left']['right']['right'],	#6
+					 # '\n\n', root['right']['left']['left']['stamp'],	root['right']['left']['left']['stamp'],	#9
+					 # '\n\n', root['right']['left']['right']['stamp'],	root['right']['left']['right']['stamp'],#10
+					 # '\n\n', root['right']['right']['left']['stamp'],	#12
+					 # '\n\n', root['right']['right']['right']['stamp'],	#13
 
-					 '\n\n--==--', root['left']['right']['right']['left']['stamp'],	#??
-					 '\n\n--==--', root['left']['right']['right']['right']['stamp'],
-
+					 # '\n\n--most left--', root['left']['left']['left']['left'],	#??
+					 #'\n\n--==--', root['left']['left']['left']['right']['stamp'],
+					 #'\n\n--==--', root['left']['left']['right']['right']['stamp'],
 					 # '\n\n--==--', root['left']['left']['right']['left']['stamp'],	#??
 					 # '\n\n--==--', root['left']['left']['right']['right']['stamp']
 					 )	
 	# 0 -> 1, 6 	1 -> 2, 4 		6 -> 7, 9
 	stamp = root['stamp']
 	print('initial stamp : ',stamp)
-	print(print_recursive_stamp(root))
+	print('---recursive print--', print_recursive_stamp(root))
 
 	return root
 
@@ -526,9 +544,9 @@ if __name__ == "__main__":
 	read_arff(args.train)
 	#make_attr_values_dict(data)
 	#split_in_all_in_one(data)
-	tree = build_tree(data, 4, 20)
+	tree = build_tree(data, 3, 20)
 	
-	print(node_collection)
+	print(node_collection, '\nThis is length of Node collection', len(node_collection))
 	#print(len(node_collection))
 	
 	#print_tree(tree)
