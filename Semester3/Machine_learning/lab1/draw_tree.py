@@ -59,9 +59,28 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
         fill_nodes(Master = Master, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
 print(nat)
-fill_nodes()
-
-
+try : fill_nodes()
+except : pass
+"""
+0 ->bb  1 [0, 'node', 1] [1, 'node', 0]
+1 ->bb  2 [1, 'node', 1] [2, 'node', 0]
+2 ->cc  3 [2, 'node', 1] [3, 'terminal', 0]
+2 ->kk  4 [2, 'node', 2] [4, 'terminal', 0]
+1 ->bb  5 [1, 'node', 2] [5, 'node', 0]
+5 ->cc  6 [5, 'node', 1] [6, 'terminal', 0]
+5 ->kk  7 [5, 'node', 2] [7, 'terminal', 0]
+4 ->ee  8 [4, 'terminal', 1] [8, 'node', 0]
+3 ->ee  8 [3, 'terminal', 1] [8, 'node', 0]
+2 ->aa  8 [2, 'node', 3] [8, 'node', 0]
+1 ->aa  8 [1, 'node', 3] [8, 'node', 0]
+0 ->bb  8 [0, 'node', 2] [8, 'node', 0]
+8 ->bb  9 [8, 'node', 1] [9, 'node', 0]
+9 ->cc  10 [9, 'node', 1] [10, 'terminal', 0]
+9 ->kk  11 [9, 'node', 2] [11, 'terminal', 0]
+8 ->bb  12 [8, 'node', 2] [12, 'node', 0]
+12 ->cc  13 [12, 'node', 1] [13, 'terminal', 0]
+12 ->kk  14 [12, 'node', 2] [14, 'terminal', 0]
+"""
 
 from graphviz import Graph
 g = Graph(format='png')
