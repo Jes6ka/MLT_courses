@@ -3,7 +3,7 @@
 #========================== import Module ==========================#
 import os, sys, argparse;
 import random, copy;
-import arff #https://pypi.python.org/pypi/liac-arff
+
 from collections import defaultdict
 
 #import nltk
@@ -11,12 +11,17 @@ from nltk.corpus import gutenberg
 
 from feature import *
 
+
+# arff part, there is handy library
+#pip instal liac-arff
+#pip install drawtree
+
 #========================== import Module ==========================#
 
 
 
 
-#========================== initial Module ==========================#
+#========================== Get Arguments ==========================#
 
 parser = argparse.ArgumentParser(description = "Process the txt files")
 parser.add_argument("files", nargs="+", type=str, help="the input file names" )
@@ -28,7 +33,7 @@ parser.add_argument("--svd", type= int, default = 0)
 parser.add_argument("--novocab", default = False , action = "store_true")
 
 args = parser.parse_args()
-#========================== initial Module ==========================#
+#========================== Get Arguments ==========================#
 
 
 
@@ -39,6 +44,8 @@ args = parser.parse_args()
 gutenberg_book_list = list(gutenberg.fileids())
 annotated_sents  = []
 txt_length = 0
+splitpoint = 0
+shuffled_dict = {'shuffled_train' : [], 'shuffled_test' : []}
 #========================== Constant ==========================#
 
 
@@ -97,16 +104,19 @@ def shuffle_sentence_and_save(args_obj):
 
     global txt_length
     global annotated_sents
-
+    global splitpoint
+    global shuffled_dict
 
     txt_sents         = defaultdict(list) # looks like this, {'author1' : [sent1, sent2 ...]}
     testpercent_dict  = {'train' : [], 'test' : []} #[[splitpoint], [sent1, sent2, sent3]]
-    shuffled_dict = {'shuffled_train' : [], 'shuffled_test' : []}
+    
 
     for each_txt_file in args_obj.files:
         with open(each_txt_file, 'r') as f:
                 for line in f:
                     txt_sents[each_txt_file].append(line)
+                    #didn't make it lower(). because, it seems it helps, classification.
+                    #e.g., With, Though, Alice, ... can be used for tree. maybe.
 
         # mixed all sentence.
         random.shuffle(txt_sents[each_txt_file])
@@ -153,34 +163,6 @@ def split_train_test_set(args_obj, sentences):
     return(splitpoint)
 
 
-# def make_arff(args_obj):
-#     trainfile = open(args_obj.train, "w")
-#     trainingdata = {}
-#     trainingdata[u'relation']   = "relation_exist" 
-#     trainingdata[u'attributes'] = [
-#     				(u'sentencelength', u'REAL'), #feature_list[0, 1, 2]...
-#     				(u'somelength', u'REAL'),
-#     				(u'class', args.files)
-#     				]
-#     trainingdata[u'description'] = "this is description"
-
-
-# #filehandles = []
-# for filename in args.files:
-#     print(filename)
-#     #filehandles.append(open(filename, "r"))
-
-
-# #loading is, data = arff.load(open('wheater.arff', 'rb'))
-
-# trainfile.write(arff.dumps(trainingdata))
-# trainfile.close()
-
-# arff part, there is handy library
-#pip instal liac-arff
-
-#pip install drawtree
-
 
 if __name__ == "__main__":
 # for book in gutenberg_book_list:
@@ -196,11 +178,15 @@ if __name__ == "__main__":
             print('inside of svd\n')
             #here feature5_vocab_svd
     
-    test = attributes_collection(args, annotated_sents)
-    print(len(test.final_list))
+    obj_train = attributes_collection(args, shuffled_dict['shuffled_train'])
+    obj_test = attributes_collection(args, shuffled_dict['shuffled_test'])
 
-    test.extract_attr()
-    test.save_to_arff()
-    
+    print(len(obj_train.final_list))
+    print(len(obj_test.final_list))
+
+    obj_train.extract_attr()
+    obj_train.save_to_arff(train=True)
+    obj_test.extract_attr()
+    obj_test.save_to_arff(test=True)
     #print(vars(test), dir(test))
     print("this is svd ", args.svd, "\nthis is novocab", args.novocab)
