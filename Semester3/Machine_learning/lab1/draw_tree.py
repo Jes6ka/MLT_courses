@@ -4,15 +4,6 @@ node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('terminal', 'terminal', -7777, 3),
                    ('terminal', 'terminal', -7777, 4),
                    ('attr3', 'sp1', 2.065308108672463, 5),
-                   ('terminal', 'terminal', -7777, 6)('terminal', 'terminal', -7777, 7)('attr2', 'sp2', 2.5888773127155993, 8)('attr3', 'sp5', 3.7949417141146546, 9)('terminal', 'terminal', -7777, 10)('terminal', 'terminal', -7777, 11)('attr3', 'sp5', 4.5311631058202053, 12)('terminal', 'terminal', -7777, 13)('terminal', 'terminal', -7777, 14)]
-
-
-node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
-                   ('attr2', 'sp1', 0.545663100388463, 1),
-                   ('attr3', 'sp5', 2.245804529802605, 2),
-                   ('terminal', 'terminal', -7777, 3),
-                   ('terminal', 'terminal', -7777, 4),
-                   ('attr3', 'sp1', 2.065308108672463, 5),
                    ('terminal', 'terminal', -7777, 6),
                    ('terminal', 'terminal', -7777, 7),
                    ('attr2', 'sp2', 2.5888773127155993, 8),
@@ -22,29 +13,53 @@ node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('attr3', 'sp5', 4.5311631058202053, 12),
                    ('terminal', 'terminal', -7777, 13),
                    ('terminal', 'terminal', -7777, 14)]
-MOM = Master_of_Master = 0
-Master, Slave = int(), int()
+#MOM = Master_of_Master = 0
+#Master, Slave = int(), int()
 nat = Node_and_Terminal = []
 already_used = 0
 for attr, sp, sp_v, n_o in node_collection:
         if sp=="terminal":   nat.append([n_o, "terminal", already_used])
         else : nat.append([n_o, "node", already_used])
 
-def fill_nodes(MOM=0): # fill_nodes(node_collection)
-    #global nat
-    Master = MOM
-    Slave  = Master+1
-    nat[Master][2] += 1#already used +1
-    if nat[Master][1] == True : return("go to next")
-    if nat[Slave][1] == "node" :
-        Master = Slave
-    else : 
-        Master = Master
+def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_collection)
+    global nat
     
-    Slave  = Slave+1
-    print(Master, '->', Slave)
-    fill_nodes(MOM=Master)
+    nat[Master][2] += 1
+    
+    if Last_Slave == "terminal" and nat[Slave][1] == "terminal":
+        if nat[Master][2]==3: 
+            print("QuQUQU")
+            fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = "ghost")
+        print(Master, '->kk ', Slave,nat[Master], nat[Slave])
+        fill_nodes(Master=Master-1,Slave= Slave+1, Last_Slave = "ghost")
+        
+    if nat[Master][2] == 3 :
+        if nat[Master][1]=="terminal":
+            
+            print(Master, '->ee ', Slave,nat[Master], nat[Slave])
+            fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = nat[Slave][1])
 
+        print(Master, '->dd ', Slave,nat[Master], nat[Slave])
+        fill_nodes(Master=Master-1, Slave=Slave+1, Last_Slave = nat[Slave][1])
+    
+    if nat[Slave][1] == "node" :
+        
+        if nat[Master][2] == 3: 
+
+            print(Master, '->aa ', Slave,nat[Master], nat[Slave])
+            fill_nodes(Master=Master-1, Slave = Slave+1, Last_Slave = nat[Slave][1])
+
+        print(Master, '->bb ', Slave,nat[Master], nat[Slave])
+        fill_nodes(Master = Slave, Slave = Slave+1, Last_Slave = nat[Slave][1])
+
+    else : 
+        if nat[Master][2] == 3 :
+            fill_nodes(Master=Master-1, Slave=Slave, Last_Slave = nat[Slave][1])
+            
+        print(Master, '->cc ', Slave,nat[Master], nat[Slave])
+        fill_nodes(Master = Master, Slave = Slave+1, Last_Slave = nat[Slave][1])
+
+print(nat)
 fill_nodes()
 
 
