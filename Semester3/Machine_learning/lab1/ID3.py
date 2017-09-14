@@ -39,13 +39,14 @@ args = parser.parse_args()
 # tag - start symbol 
 start_symbol = "start"
 REMOVE_CALSS = 1
-attr_dict = defaultdict(list)
 # For buckets, split point
 LOW  = 10
 MID  = 20
 HIGH = 50
 data = None
 nan = float('nan')
+node_collection = list()
+t1,t2,t3 = 0,0,0
 #========================== Constant ==========================#
 
 
@@ -57,7 +58,8 @@ nan = float('nan')
 def read_arff(file_name):
 	global data
 	data = arff.load(open(file_name, 'r'))# 'rb' is read as binary
-	print(data['data'][:10])
+	data = data['data']
+	#print(data[:10])
 	return(None)
 
 """
@@ -82,10 +84,10 @@ arff looks like, aka, the above data looks like
 def make_attr_values_dict(raw_data):
 	""" This is used for making attr_sp_dict, when making split points."""
 	attr_values_dict = defaultdict(list)
-	for line in raw_data['data']:	#line is [sunny, 85, 53, 2, class1]
+	for line in raw_data:	#line is [sunny, 85, 53, 2, class1]
 		for n, attr_value in enumerate(line[:-REMOVE_CALSS]):
 			attr_values_dict['attr'+str(n+1)].append(attr_value)
-	print(attr_values_dict.keys(), attr_values_dict['attr1'][:20])
+	#print(attr_values_dict.keys(), attr_values_dict['attr1'][:20])
 	# test1 = attr_values_dict['attr2']
 	# test2 = stats.trimboth(test1, 0.1)
 	
@@ -115,11 +117,11 @@ def make_attr_values_dict(raw_data):
 
 def make_attr_class_dict(raw_data):
 	attr_class_dict = defaultdict(list)
-	for line in raw_data['data']:		#line is [sunny, 85, 53, 2, class1]
+	for line in raw_data:		#line is [sunny, 85, 53, 2, class1]
 		for n, attr_value in enumerate(line[:-REMOVE_CALSS]):
 			attr_class_dict['attr'+str(n+1)].append((attr_value, line[-1])) #line[-1] is class( author.txt)
 	
-	print(attr_class_dict.keys(), attr_class_dict['attr1'][:10])
+	#print(attr_class_dict.keys(), attr_class_dict['attr1'][:10])
 	return attr_class_dict 				#looks like, {attr1: [(22, austen), (13, milton)], attr2 : [(1, austen), (1.3, austen)]}
 
 def make_attr_sp_dict(raw_data):
@@ -129,25 +131,33 @@ def make_attr_sp_dict(raw_data):
 			from median(M), I will use [M-3sd, M-2sd, M-sd, M-0.5sd, M, M+0.5sd, M+sd, M+2sd, M+3sd]
 			So, total spliting point will be nine.
 	"""
+	attr_sp_dict_global = defaultdict(dict)
 	attr_sp_dict = defaultdict(list)
+
 	attr_values_dict = make_attr_values_dict(raw_data) 				#{attr1: [22,24,21,23,...], attr2: [1,2,1,1,...]}
 	
 	for n in range(len(attr_values_dict)): #len(attr_values_dict) is number of attributes.
 			avd = attr_values_dict['attr'+str(n+1)]
 			median  = np.median(avd)
-			tm  = stats.trim_mean(avd, 0.10)
+			tm  = stats.trim_mean(avd, 0.05)
 			sd  = np.std(avd, ddof=1)
 			#attr_sp_dict['attr'+str(n+1)].append(stats.mode(avd))  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(tm-0.5*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(tm-0.2*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(tm-0*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(tm+0.2*sd)  #line[-1] is class( author.txt)
-			attr_sp_dict['attr'+str(n+1)].append(tm+0.5*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median-1*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median-0.5*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median-0*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median+0.5*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict['attr'+str(n+1)].append(median+1*sd)  #line[-1] is class( author.txt)
 	
+			attr_sp_dict_global['attr'+str(n+1)]['sp1']=(median-1*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict_global['attr'+str(n+1)]['sp2']=(median-0.5*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict_global['attr'+str(n+1)]['sp3']=(median-0*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict_global['attr'+str(n+1)]['sp4']=(median+0.5*sd)  #line[-1] is class( author.txt)
+			attr_sp_dict_global['attr'+str(n+1)]['sp5']=(median+1*sd)  #line[-1] is class( author.txt)
 
-	print('\n\n',attr_sp_dict)
-	return attr_sp_dict 							#looks like, {attr1 : [sp1, sp2, ...sp9]}, attr2 : [sp1,sp2..sp9]
-
+	#print('\n\n',attr_sp_dict)
+	return attr_sp_dict, attr_sp_dict_global		
+	#attr_sp_dict = {attr1 : [0.2, 0.4, ...sp9]}, attr2 : [sp1,sp2..sp9]
+	#attr_sp_dict_global = {attr1 : {sp1 : 0.2, sp2: 0.4...}}
 
 def split_small_big(attr_class_dict, attr_sp_dict):
 	"""
@@ -254,7 +264,55 @@ def fitting_data(candidate_group_dict):
 	return fit_data_dict
 
 
-def choose_best_gain(fit_data_dict):
+def entropy(p):
+	calc = p*np.log2(p)+(1-p)*np.log2(1-p)
+	return(-calc)
+
+def gain_calculate(sob_group_by_class_list): # [(23, 402), (52, 387), ... (author_n_small, author_n_big)]
+	"""
+	milton : 1479	austen : 2998
+	case for Attr1, sp3
+	Small 	= 		M : 466		A : 1776
+	Big 	= 		M : 1015	A : 1224
+
+	1.Entropy(M.small+A.small/M.small+M.big+A.small+A.big) = entropy(2242/4481) = 0.999
+	2.Entropy(M.small/M.small + M.big) = entropy(466/1481) = 0.898
+	3.Entropy(A.small/A.small+A.big) = entropy(1775/3000) = 0.976
+
+	Gain = 1-(2+3) = 0.999-(0.898+0.976) = -0.875
+	"""
+	#print('========CHECK=========', sob_group_by_class_list)
+	total_small = 0
+	total_big 	= 0
+	sum_each_prob_entropy = 0
+
+	for small_v, big_v in sob_group_by_class_list:
+		if small_v <= 2 or big_v <=2 : 
+			total_small, total_big, sum_each_prob_entropy = 2,1,99
+			continue
+		if small_v <= big_v:
+			#print('===s,b,entrop1===', small_v, big_v, entropy(small_v/(small_v+big_v)))
+			sum_each_prob_entropy += entropy(small_v/(small_v+big_v))
+			total_small += small_v
+			total_big 	+= big_v
+		else : 
+			#print('===s,b,entrop2===', small_v, big_v, entropy(big_v/(small_v+big_v)))
+			sum_each_prob_entropy += entropy(big_v/(small_v+big_v))
+			total_small += big_v
+			total_big 	+= small_v
+
+	#Now, calculate real IG(Information Gain)
+	
+	IG = entropy(total_small/total_big)- sum_each_prob_entropy
+	#print('head entropy is',entropy(total_small/total_big))
+	#print('IG is',IG)
+	if math.isnan(IG):
+		#print('this is nan')
+		return(-5000)
+	else :	return(IG)
+
+
+def choose_best_gain(fit_data_dict, attr_sp_dict_global):
 	"""
 	fit_data_dict :	fit_data_dict
 	[{'austen': {'small': 23, 'big': 402}, 
@@ -274,149 +332,89 @@ def choose_best_gain(fit_data_dict):
 				#sob_group_by_class_list : [(23, 402), (52, 387), ... (author_n_small, author_n_big)]
 			
 			#each_gain_list : [(att1, sp1, 0.22), (attr1, sp2, 0.01) ...]
-			gain_list.append( (attr, sp, gain_calculate(sob_group_by_class_list)  )     )           
+			gain_list.append( (attr, sp, attr_sp_dict_global[attr][sp], gain_calculate(sob_group_by_class_list)  )     )           
 	
 
-	best_gain = max(gain_list)
-	fit_data_dict
-	print('This is all_gain : ', gain_list, '\n This is best gain', best_gain)
-	print('This is fit_data_dict : ', fit_data_dict['attr3']['sp5'])
+	best_gain = max(gain_list, key=lambda x : x[-1]) #find max vaule-key is gain.
+	print('\n This is best gain', best_gain)
+	#print('This is all_gain : ', gain_list, '\n This is best gain', best_gain)
+	#print('This is sp_dict : ', attr_sp_dict_global['attr2'], '\n This is best gain', best_gain)
 
 	return best_gain
 
-def select_best_gain():
-	return None
+def test_split(index_attr, value_split_point, raw_data):
+    left, right = list(), list()
+    for row in raw_data:
+        if row[int(index_attr[-1])-1] < value_split_point: #get indx_of_attr
+            left.append(row)
+        else :
+            right.append(row)
+    return left, right
 
-def make_node():
-	return None #e.g.,  attr1 <= 423
+def split_in_all_in_one(raw_data):
+	global node_collection
+	b_index, b_value, b_score, b_groups = 2, 99999, 7777, None
 
-def split_by_node():
-	return None #should return, two raw_data that split by node.
+	attr_class_dict 					= make_attr_class_dict(raw_data)
+	attr_sp_dict, attr_sp_dict_global	= make_attr_sp_dict(raw_data)
+	candidate_group_dict				= split_small_big(attr_class_dict, attr_sp_dict)
+	fit_data_dict						= fitting_data(candidate_group_dict)
+	attr, sp, sp_v, IG = choose_best_gain(fit_data_dict, attr_sp_dict_global)
 
-def entropy(p):
-	calc = p*np.log2(p)+(1-p)*np.log2(1-p)
-	return(-calc)
+	left_right_groups = test_split(attr, sp_v, raw_data)
+	node_collection.append((t1, t2, attr, sp, sp_v))
+	print("all in one split is succussful")
+	return {'index':attr, 'value':sp_v, 'groups':left_right_groups} 
 
-def gain_calculate(sob_group_by_class_list): # [(23, 402), (52, 387), ... (author_n_small, author_n_big)]
-	"""
-	milton : 1479	austen : 2998
-	case for Attr1, sp3
-	Small 	= 		M : 466		A : 1776
-	Big 	= 		M : 1015	A : 1224
+def to_terminal(group):
+    outcomes = [row[-1] for row in group]
+    #print(outcomes, max(outcomes, key=outcomes.count))
+    return max(set(outcomes), key=outcomes.count)
+def split(node, max_depth, min_size, depth):
+	global t1,t2,t3
+	#print('this is groups   ',node['groups'])
+	left, right = node['groups']
+	#print("Left ===========",left[:5])
+	del(node['groups'])
+	# check for a no split
+	if not left or not right:
+		node['left'] = node['right'] = to_terminal(left + right)
+		return
+	# check for max depth
+	if depth >= max_depth:
+		node['left'], node['right'] = to_terminal(left), to_terminal(right)
+		return
+	# process left child
+	if len(left) <= min_size:
+		node['left'] = to_terminal(left)
+	else:
+		t1+=1
+		node['left'] = split_in_all_in_one(left)
+		split(node['left'], max_depth, min_size, depth+1)
+	# process right child
+	if len(right) <= min_size:
+		node['right'] = to_terminal(right)
+	else:
+		t2+=1
+		node['right'] = split_in_all_in_one(right)
+		split(node['right'], max_depth, min_size, depth+1)
 
-	1.Entropy(M.small+A.small/M.small+M.big+A.small+A.big) = entropy(2242/4481) = 0.999
-	2.Entropy(M.small/M.small + M.big) = entropy(466/1481) = 0.898
-	3.Entropy(A.small/A.small+A.big) = entropy(1775/3000) = 0.976
+def build_tree(train, max_depth, min_size):
+	root = split_in_all_in_one(train)
+	split(root, max_depth, min_size, 1)
+	print(len(root), '\n\n', root['left']['left'], '\n\n', root['right'])
+	return root
+def print_tree(node, depth=0):
+	if isinstance(node, dict):
+		print('%s[X%d < %.3f]' % ((depth*' ', (node['index']+1), node['value'])))
+		print_tree(node['left'], depth+1)
+		print_tree(node['right'], depth+1)
+	else:
+		print('%s[%s]' % ((depth*' ', node)))
+def recursive_split(raw_data,best_gain):
 
-	Gain = 1-(2+3) = 0.999-(0.898+0.976) = -0.875
-	"""
-	print('========CHECK=========', sob_group_by_class_list)
-	total_small = 0
-	total_big 	= 0
-	sum_each_prob_entropy = 0
-
-	for small_v, big_v in sob_group_by_class_list:
-		if small_v <= 2 or big_v <=2 : 
-			total_small, total_big, sum_each_prob_entropy = 2,1,99
-			continue
-		if small_v <= big_v:
-			print('===s,b,entrop1===', small_v, big_v, entropy(small_v/(small_v+big_v)))
-			sum_each_prob_entropy += entropy(small_v/(small_v+big_v))
-			total_small += small_v
-			total_big 	+= big_v
-		else : 
-			print('===s,b,entrop2===', small_v, big_v, entropy(big_v/(small_v+big_v)))
-			sum_each_prob_entropy += entropy(big_v/(small_v+big_v))
-			total_small += big_v
-			total_big 	+= small_v
-
-	#Now, calculate real IG(Information Gain)
-	
-	IG = entropy(total_small/total_big)- sum_each_prob_entropy
-	print('head entropy is',entropy(total_small/total_big))
-	print('IG is',IG)
-	if math.isnan(IG):
-		print('this is nan')
-		return(-99)
-	else :	return(IG)
-
-
-
-
-
-def make_split_point(split_number = MID): # let's use stats.trim_mean(x, 0.1) trimming-left-right-10%, total 20% then get mean.
-	global attr_dict
-	split_interval = 0
-	split_point_dict = defaultdict(list)
-	
-	
-	class_index = len(data['data'][0])-remove_class # max-1, it means, removing "Class, Categories, authors"
-
-	for one_line in data['data']:
-		for n, attr_value in enumerate(one_line):
-			if n == class_index : break
-			attr_dict['attr'+str(n)].append(attr_value)
-			# {attr0:[21, 24...], attr1:[0.2, 0.1...], ...attr[n-1] :[9999,9999,9999...]]
-	for each_attr in attr_dict:
-		#print('888888888888888888', np.std(attr_dict[each_attr]), attr_dict[each_attr][:10], type(attr_dict[each_attr][0]))
-		#split_interval = round(np.median(attr_dict[each_attr])/split_number, 3) 	# Median
-		#split_interval = round(stats.mode(attr_dict[each_attr])/split_number, 3) 	# Mode
-		
-		# stats.kurtosis(arr), 3 is twisted, 0 for a normal distribution
-		# stats.kurtosistest(arr), return Z-score & p-value
-		#A z-score equal to 0 represents an element equal to the mean. 
-		#A z-score equal to 1 represents an element that is 1 standard deviation greater than the mean; 
-		#a z-score equal to 2, 2 standard deviations greater than the mean
-
-		# stats.skew(arr), 0 is equal symmetric to axis
-		# stats.skewtest(arr),  return Z-score & p-value
-
-		split_interval = np.std(attr_dict[each_attr], ddof=1)/split_number 	#ddof,  unbiased estimator  (N-1 in the denominator)
-		#print('555555555555', split_interval)
-		# Simply,  interval = max-min/split_number
-		
-		temp = [-float("inf")] # This is because, split point must be unique.
-		for step in range(split_number):
-			print(step, split_number, 'aaaaaaaaaaaaaaaaaaaa', min(attr_dict[each_attr]))
-			temp.append(min(attr_dict[each_attr]) + step*round(split_interval, 3))
-		
-		#split_point must have bigger # than elements, that's why adding +1
-		temp.append(round(max(attr_dict[each_attr])+1, 3))
-		split_point_dict[each_attr].append(temp)
-
-    # Assume, attributes1~3, each attributes has 10classes, total 30
-	print(split_point_dict)
-	return split_point_dict
-	# {attr0 : [sp1, sp2, ...sp20], attr1 :[sp1, sp2, ... sp20] ...]
-	# data[data] : [attr0-value, attr1-value... class]
-    # what i need, {class1 : {attr0 : [22, 32, 19,...], attr1:[ ... ]}, class2 : {attr0 : []} }
-
-def discretize(split_point_list):
-	#split_point_list = [0, 4, 10, 30, 45, 99999], my case # 22 : [ [0, sp1, sp2, ...sp20, sp20+1], [sp1, sp2, ... sp20] ...]
-	#split_point_list(bins) must be one more than the number of Label(bucket_list)
-	discretized_attr_dict = defaultdict(list)
-	bucket_list = []
-	#label = bucket_list
-
-	for i in range(len(split_point_list[0])-1):
-		bucket_list.append('b'+str(i))
-
-	print('\n\nbucket list is ',bucket_list, '\n\n split_point_list', split_point_list)
-	
-	for attr in attr_dict:
-		temp = attr_dict[attr]
-		print('\n\n',temp[:200], type(temp), type(temp[0]),'\n\n')
-		for split_points in split_point_list:
-			discretized_attr_dict[attr].append(pd.cut(temp, bins=split_points, labels=bucket_list))
-			#pd.cut(temp[:20], bins=split_points, labels=bucket_list)
-
-	# {attr0:[21, 24...], attr1:[0.2, 0.1...], ...attr[n-1] :[9999,9999,9999...]]
-	#labels = ['b0', 'b1', 'b2', 'b3','b4' ... 'b18'] #total # is 19
-	# Categories (5, object): [High_Fare < Low_Fare < Med_Fare < Very_High_Fare < Very_Low_Fare]
-	# reference : https://stackoverflow.com/questions/23267767/how-to-do-discretization-of-continuous-attributes-in-sklearn
-
-	print(discretized_attr_dict['attr1'][:20])
-	return discretized_attr_dict
+	return recursive_split(raw_data_left)
+	return recursive_split(raw_data_right) #e.g.,  attr1 <= 423
 
 
 
@@ -482,13 +480,15 @@ def discretize(split_point_list):
 if __name__ == "__main__":
 	read_arff(args.train)
 	#make_attr_values_dict(data)
-	attr_class_dict 		= make_attr_class_dict(data)
-	attr_sp_dict 			= make_attr_sp_dict(data)
-	candidate_group_dict	= split_small_big(attr_class_dict, attr_sp_dict)
-	fit_data_dict			= fitting_data(candidate_group_dict)
-	choose_best_gain(fit_data_dict)
+	#split_in_all_in_one(data)
+	tree = build_tree(data, 5, 20)
+	print(node_collection)
+	print(len(node_collection))
+	#print_tree(tree)
 	#split_point_list = make_split_point()
 	#discretize(split_point_list)
+
+
 # Pruning part, Reduced Error Pruning
 """ https://www.cs.auckland.ac.nz/~pat/706_98/ln/node90.html
 
