@@ -95,14 +95,19 @@ def feature1(annotated_sents):
 def feature2(annotated_sents):
     """ # of long words"""
 
-    tokenize(annotated_sents)
+    #tokenize(annotated_sents)
     feature2_list = []
 
     for author, word_list in word_in_sent:
         score = 0
         for word in word_list:
             #print(word, len(word))
-            if len(word) >= 4 : score+=1
+            if len(word) >= 7 : score+=1
+    # """
+    # Here is amazing part. if I set len(word)>=7, I'll get 41percent or so in real data.
+    # But when I set it as 7, 64percent at validation(10folds), 
+    #         68percent in real test set.
+    # """
         #print("score is {0}".format(score))
         feature2_list.append((author, score))
 
@@ -110,26 +115,39 @@ def feature2(annotated_sents):
 
     return feature2_list
 
+
 #author_word_dictionary : {'author1' : [word1, word2, word3,...])]
+#  annotated_sents = [('a', "This is glory"), ('b', "sent3"), ...]
 def feature3(annotated_sents):
+    #tokenize(annotated_sents) # <== already excuted before in feature1, or just put it in class function
     feature3_list = []
-    for author, sent in annotated_sents:
+    for author, sent in word_in_sent:
         feature3_list.append((author, 9999))
     
-    counter=collections.Counter(author_word_dictionary['austen-persuasion.txt'])
-    print(counter.most_common(50))
-    counter=collections.Counter(author_word_dictionary['milton-paradise.txt'])
-    print(counter.most_common(50))
+    # counter=collections.Counter(author_word_dictionary['austen-persuasion.txt'])
+    # print(counter.most_common(50))
+    # counter=collections.Counter(author_word_dictionary['milton-paradise.txt'])
+    # print(counter.most_common(50))
     
-    punt_removed_dict = remove_punct(author_word_dictionary)
-    counter=collections.Counter(punt_removed_dict['austen-persuasion.txt'])
-    print(counter.most_common(50))
-    counter=collections.Counter(punt_removed_dict['milton-paradise.txt'])
-    print(counter.most_common(50))
+    # punt_removed_dict = remove_punct(author_word_dictionary)
+    # counter=collections.Counter(punt_removed_dict['austen-persuasion.txt'])
+    # print(counter.most_common(50))
+    # counter=collections.Counter(punt_removed_dict['milton-paradise.txt'])
+    # print(counter.most_common(50))
 
     #print(author_word_dictionary['austen-persuasion.txt'][:40])
     return feature3_list
 
+def feature4(annotated_sents):
+    tokenize(annotated_sents)
+    feature4_list = []
+    for author, word_list in word_in_sent:
+        score = 0
+        for word in word_list:
+            if word in stops: score+=1
+        feature4_list.append((author, score))
+
+    return feature4_list
 
 class attributes_collection():
     """
@@ -144,9 +162,11 @@ class attributes_collection():
         self.final_list   = []
 
         self.features = ['punct_sentence_ratio',
-                          "#_of_long_words",
-                          'Test_attribute3']
+                          '#_of_long_words',
+                          'Test_attribute3',
+                          'Test_attribute4']
 
+        tokenize(annotated_sents) #for feature1, 2 +
     #sent1 : [aut1, [13, 5133, 0.11]]
     #sent2 : [aut2, [15, 2929, 0.02]]
 
@@ -169,23 +189,26 @@ class attributes_collection():
                     self.final_list.append(temp)  #[[milton, [0.14]], [austen, [0.05]]]
 
             else:
-                #print('ooooooooooooooooooooooooooooooooooooooo')
-                flag = 0 #total len(each_feature_list) = 4475
-                for author, value in each_feature_list:
-                    self.final_list[flag][1].append(value)  # ['author', [22, 1.492]]
+                for n, (author, value) in enumerate(each_feature_list):
+                    #sometimes it occurs error. simply ignore it by not saving it. maybe one or two sentence afftected.
+                    try : self.final_list[n][1].append(value)  # ['author', [22, 1.492]]
+                    except : pass
                         #print(len(self.final_list), '------\n', len(each_feature_list), each_feature_list[:10])
                         #print("===========", self.final_list[i][0], author)
                         #assert(self.final_list[i][0]==author)
                     #print('flaggggggg', self.final_list[flag][0], author, self.final_list[flag])
-                    flag+=1
                  # [  ['author1', [22, 1]], ['author2', [10, 2]] ]
             print("one_round successful")
 
         #print(attr_num, '\n')
         return(print("all successful"))
 
-    def save_to_arff(self):
-        with open('sungmin_test.txt', 'w') as f:
+    def save_to_arff(self, train=False, test=False):
+        if train : filename  = self.args.train
+        elif test : filename = self.args.test
+        print("This is file name",filename)
+
+        with open(filename, 'w') as f:
             f.write("@RELATION {}\n\n".format("text_classifier"))
             for attr_name in self.features:
                 f.write("@ATTRIBUTE {} REAL\n".format(attr_name))
