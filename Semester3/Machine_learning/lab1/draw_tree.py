@@ -33,11 +33,10 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
         print(Master, '->kk ', Slave,nat[Master], nat[Slave])
         fill_nodes(Master=Master-1,Slave= Slave+1, Last_Slave = "ghost")
         
-    if nat[Master][2] == 3 :
-        if nat[Master][1]=="terminal":
+    if nat[Master][1]=="terminal":
             
-            print(Master, '->ee ', Slave,nat[Master], nat[Slave])
-            fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = nat[Slave][1])
+        print(Master, '->ee ', Slave,nat[Master], nat[Slave])
+        fill_nodes(Master=Master-1,Slave= Slave, Last_Slave = nat[Slave][1])
 
         print(Master, '->dd ', Slave,nat[Master], nat[Slave])
         fill_nodes(Master=Master-1, Slave=Slave+1, Last_Slave = nat[Slave][1])
@@ -47,7 +46,7 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
         if nat[Master][2] == 3: 
 
             print(Master, '->aa ', Slave,nat[Master], nat[Slave])
-            fill_nodes(Master=Master-1, Slave = Slave+1, Last_Slave = nat[Slave][1])
+            fill_nodes(Master=Master-1, Slave = Slave, Last_Slave = nat[Slave][1])
 
         print(Master, '->bb ', Slave,nat[Master], nat[Slave])
         fill_nodes(Master = Slave, Slave = Slave+1, Last_Slave = nat[Slave][1])
@@ -61,6 +60,7 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
 
 print(nat)
 fill_nodes()
+
 
 
 from graphviz import Graph
