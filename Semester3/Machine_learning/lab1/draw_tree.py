@@ -181,7 +181,7 @@ node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('terminal', 'terminal', -7777, 13),
                    ('terminal', 'terminal', -7777, 14)]
 
-node_collection2 = [('attr2', 'sp2', 1.6373326057329134, 0),
+node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('attr2', 'sp1', 0.545663100388463, 1),
                    ('attr3', 'terminal', 2.245804529802605, 2),
                    ('terminal', 'sp2', -7777, 3),
@@ -194,7 +194,7 @@ node_collection2 = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('terminal', 'terminal', -7777, 10)]
 #MOM = Master_of_Master = 0
 #Master, Slave = int(), int()
-linking_tree_leaf_list = []
+node_relation_list = []
 nat = Node_and_Terminal = []
 already_used = 0
 for attr, sp, sp_v, n_o in node_collection:
@@ -208,7 +208,7 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
     
     if Last_Slave == "terminal" and nat[Slave][1] == "terminal":
         print(Master, '->kk ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append([Master, Slave])
+        node_relation_list.append((Master, Slave))
         fill_nodes(Master=Master-1,Slave= Slave+1, Last_Slave = "ghost")
         
     if nat[Master][1]=="terminal":
@@ -224,7 +224,7 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
             fill_nodes(Master=Master-1, Slave = Slave, Last_Slave = nat[Slave][1])
 
         print(Master, '->bb ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append([Master, Slave])
+        node_relation_list.append((Master, Slave))
         fill_nodes(Master = Slave, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
     else : 
@@ -232,10 +232,24 @@ def fill_nodes(Master=0, Slave=1, Last_Slave = "ghost"): # fill_nodes(node_colle
             fill_nodes(Master=Master-1, Slave=Slave, Last_Slave = nat[Slave][1])
             
         print(Master, '->cc ', Slave,nat[Master], nat[Slave])
-        linking_tree_leaf_list.append([Master, Slave])
+        node_relation_list.append((Master, Slave))
         fill_nodes(Master = Master, Slave = Slave+1, Last_Slave = nat[Slave][1])
 
 print(nat)
 try : fill_nodes()
 except : pass
-print(linking_tree_leaf_list)
+print(node_relation_list)
+
+
+            
+def Draw_tree_graphviz(node_relation_list):
+    from graphviz import Digraph
+    f = Digraph('decision_tree', filename='ID3.gv')
+    f.attr('node', shape='square')
+    for mom, child in node_relation_list:
+        f.edge('node'+str(mom), 'node'+str(child), 'label')
+
+    f.view()
+    return("Successful to draw the tree")
+
+Draw_tree_graphviz(node_relation_list)
