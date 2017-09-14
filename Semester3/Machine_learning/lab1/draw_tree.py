@@ -22,28 +22,30 @@ node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('attr3', 'sp5', 4.5311631058202053, 12),
                    ('terminal', 'terminal', -7777, 13),
                    ('terminal', 'terminal', -7777, 14)]
-mom = Master_of_Master = 0
+MOM = Master_of_Master = 0
 Master, Slave = int(), int()
 nat = Node_and_Terminal = []
-already_used = False
+already_used = 0
 for attr, sp, sp_v, n_o in node_collection:
-        if sp=="terminal":   nat.append((n_o, "terminal", already_used))
-        else : nat.append((n_o, "node", already_used))
+        if sp=="terminal":   nat.append([n_o, "terminal", already_used])
+        else : nat.append([n_o, "node", already_used])
 
-def fill_nodes(each_nat): # fill_nodes(node_collection)
-    node, termin_or_node, used_check = nat:
-    Master = node
+def fill_nodes(MOM=0): # fill_nodes(node_collection)
+    #global nat
+    Master = MOM
     Slave  = Master+1
-    if used_check : return("go to next")
-    if termin_or_node == "node" :
+    nat[Master][2] += 1#already used +1
+    if nat[Master][1] == True : return("go to next")
+    if nat[Slave][1] == "node" :
         Master = Slave
-        Slave += 1
     else : 
         Master = Master
-        Slave  = Slave+1
+    
+    Slave  = Slave+1
     print(Master, '->', Slave)
-    fill_nodes(Master, Slave)
+    fill_nodes(MOM=Master)
 
+fill_nodes()
 
 
 from graphviz import Graph
