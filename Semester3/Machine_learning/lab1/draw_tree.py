@@ -193,8 +193,8 @@ node_collection2 = [('attr2', 'sp2', 1.6373326057329134, 0),
                    ('attr3', 'terminal', 3.7949417141146546, 9),
                    ('terminal', 'terminal', -7777, 10)]
 
-#MOM = Master_of_Master = 0
-#Master, Slave = int(), int()
+linking_tree_leaf_list = []
+
 nat = Node_and_Terminal = []
 already_used = 0
 for attr, sp, sp_v, n_o in node_collection:
