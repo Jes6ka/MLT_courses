@@ -1,3 +1,15 @@
+node_collection = [('attr2', 'sp2', 1.6373326057329134, 0),
+                   ('attr2', 'sp1', 0.545663100388463, 1),
+                   ('attr3', 'sp5', 2.245804529802605, 2),
+                   ('terminal', 'terminal', -7777, 3),
+                   ('terminal', 'terminal', -7777, 4),
+                   ('attr3', 'sp1', 2.065308108672463, 5),
+                   ('terminal', 'terminal', -7777, 6)('terminal', 'terminal', -7777, 7)('attr2', 'sp2', 2.5888773127155993, 8)('attr3', 'sp5', 3.7949417141146546, 9)('terminal', 'terminal', -7777, 10)('terminal', 'terminal', -7777, 11)('attr3', 'sp5', 4.5311631058202053, 12)('terminal', 'terminal', -7777, 13)('terminal', 'terminal', -7777, 14)]
+
+
+
+
+
 from graphviz import Graph
 g = Graph(format='png')
 
