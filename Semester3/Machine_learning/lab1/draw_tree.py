@@ -101,33 +101,38 @@ dot.edge('B', 'L', constraint='false')
 dot.render('test-output/round-table.gv', view=True)  
 
 
-#http://graphviz.readthedocs.io/en/stable/examples.html#btree-py
+#http://graphviz.readthedocs.io/en/stable/examples.html
 #best example,
 
 from graphviz import Digraph
+from graphviz import Digraph
 
-g = Digraph('g', filename='btree.gv', node_attr={'shape': 'record', 'height': '.1'})
+f = Digraph('finite_state_machine', filename='fsm.gv')
+f.attr(rankdir='LR', size='8,5')
 
-g.node('node0', '<f0> |<f1> G|<f2> ')
-g.node('node1', '<f0> |<f1> E|<f2> ')
-g.node('node2', '<f0> |<f1> B|<f2> ')
-g.node('node3', '<f0> |<f1> F|<f2> ')
-g.node('node4', '<f0> |<f1> R|<f2> ')
-g.node('node5', '<f0> |<f1> H|<f2> ')
-g.node('node6', '<f0> |<f1> Y|<f2> ')
-g.node('node7', '<f0> |<f1> A|<f2> ')
-g.node('node8', '<f0> |<f1> C|<f2> ')
+f.attr('node', shape='doublecircle')
+f.node('LR_0')
+f.node('LR_3')
+f.node('LR_4')
+f.node('LR_8')
 
-g.edge('node0:f2', 'node4:f1')
-g.edge('node0:f0', 'node1:f1')
-g.edge('node1:f0', 'node2:f1')
-g.edge('node1:f2', 'node3:f1')
-g.edge('node2:f2', 'node8:f1')
-g.edge('node2:f0', 'node7:f1')
-g.edge('node4:f2', 'node6:f1')
-g.edge('node4:f0', 'node5:f1')
+f.attr('node', shape='circle')
+f.edge('LR_0', 'LR_2', label='SS(B)')
+f.edge('LR_0', 'LR_1', label='SS(S)')
+f.edge('LR_1', 'LR_3', label='S($end)')
+f.edge('LR_2', 'LR_6', label='SS(b)')
+f.edge('LR_2', 'LR_5', label='SS(a)')
+f.edge('LR_2', 'LR_4', label='S(A)')
+f.edge('LR_5', 'LR_7', label='S(b)')
+f.edge('LR_5', 'LR_5', label='S(a)')
+f.edge('LR_6', 'LR_6', label='S(b)')
+f.edge('LR_6', 'LR_5', label='S(a)')
+f.edge('LR_7', 'LR_8', label='S(b)')
+f.edge('LR_7', 'LR_5', label='S(a)')
+f.edge('LR_8', 'LR_6', label='S(b)')
+f.edge('LR_8', 'LR_5', label='S(a)')
 
-g.view()
+f.view()
 
 
 
