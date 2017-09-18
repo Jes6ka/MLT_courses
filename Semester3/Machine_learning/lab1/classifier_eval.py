@@ -67,6 +67,16 @@ def classify(raw_data, nd, nr, mother_dict = dict(), order=0):
 
 	return {'groups': (left, right)}
 
+def predict(one_line, node_relation_list):
+	for parent, child, attr, sp in node_relation_list:
+		node_relation_list.pop((parent, child, attr, sp))
+		if one_line[int(attr[-1])-1] <= sp:
+			predict(one_line, node_relation_list)
+		else :
+			predict(one_line, node_relation_list)
+			
+	return predict_class
+
 if __name__ == "__main__":
 	data = read_arff(args.test)
 	node_collection, node_relation_list = read_model(args.train_model)
