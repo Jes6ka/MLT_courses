@@ -31,14 +31,10 @@ args = parser.parse_args()
 
 #========================== Constant ==========================#
 REMOVE_CALSS = 1
-stamp = -1
-g_attr, g_sp, g_sp_v, g_IG = str(), str(), int(), int()
+stamp = 0
 node_collection = list()
 terminal_collection = list()
 #========================== Constant ==========================#
-
-
-
 
 
 
@@ -174,8 +170,10 @@ def gain_calculate(merged_freq_dict): # {austen : [1232, 332], milton : [232, 62
 
 
 
-def node_split(raw_data):
+def node_split(raw_data, stamp_act=False):
 	global stamp, node_collection
+	if stamp_act : stamp+=1
+
 	attr, sp, IG = calc_best_gain(raw_data)
 	if attr==False and sp==False and IG==False : return
 	left, right = list(), list()
@@ -186,7 +184,7 @@ def node_split(raw_data):
 			right.append(line)
 
 	status = dict(collections.Counter([line[-1] for line in raw_data]))
-	node_collection.append((attr, sp, IG, stamp+1, status))
+	node_collection.append((attr, sp, IG, stamp, status))
 
 	print("----one node split is succussful----")
 	return {'IG' : IG ,'groups': (left, right), 'status' : status, 'index' : attr, 'split_point' : sp, 'stamp' : stamp}
@@ -194,16 +192,15 @@ def node_split(raw_data):
 
 def to_terminal(group):
 	global stamp, node_collection, terminal_collection
-	stamp+=1
 	#if not node_colletor : node_collection.append((attr, sp, sp_v, stamp+1))
 	outcomes = collections.Counter([row[-1] for row in group])
-	node_collection.append(('terminal', 'terminal', -7777, stamp, outcomes))
+	node_collection.append(( (outcomes.most_common(), outcomes), 'terminal', -7777, stamp, outcomes))
 	terminal_collection.append(group)
-	print("-=-=-=-to_terminal-=-=-=-=location: ", len(node_collection), 'node order', stamp)
+	print("-=-=-=-to_terminal-=-=-=-=location: ", stamp)
 	#print(outcomes, max(outcomes, key=outcomes.count))
 	return {'most_common' : ( outcomes.most_common(), outcomes ), 'stamp' : stamp}
 
-def recursive_split(node, max_depth, min_size=10, depth=1, off_set_percent=5):
+def recursive_split(node, max_depth, min_size=50, depth=1, off_set_percent=5):
 	global stamp
 	#print('this is groups   ',node['groups'])
 	if node['groups']:
@@ -211,31 +208,26 @@ def recursive_split(node, max_depth, min_size=10, depth=1, off_set_percent=5):
 	else : return
 
 	stamp+=1
-	node['stamp'] = stamp
-	#stamp+=1
-	#print("Left ===========",left[:5])
+
 	del(node['groups'])
-	# check for a no split
-	if not node['IG']:
-		node['left'] = node['right'] = to_terminal(left + right)
-		return
+
 	# check for max depth
 	if depth >= max_depth:
-		node['left'], node['right'] = to_terminal(left), to_terminal(right)
+		node['left']  = to_terminal(left); stamp+=1
+		node['right']  = to_terminal(right); stamp+=1
 		return
-	# process left child
-	if depth >= max_depth:
-		node['left'], node['right'] = to_terminal(left), to_terminal(right)
-		return
+
 	# process left child
 	if len(left) <= min_size:
 		node['left'] = to_terminal(left)
+		stamp+=1
 	else:
-		node['left'] = node_split(left)
+		node['left'] = node_split(left, stamp_act=False)
 		recursive_split(node['left'], max_depth, depth=depth+1)
 	# process right child
 	if len(right) <= min_size:
 		node['right'] = to_terminal(right)
+		stamp+=1
 	else:
 		node['right'] = node_split(right)
 		recursive_split(node['right'], max_depth, depth=depth+1)
@@ -251,7 +243,8 @@ def recursive_split(node, max_depth, min_size=10, depth=1, off_set_percent=5):
 if __name__ == "__main__":
 	data = read_arff(args.train)
 	root = node_split(data) # attr, sp, each_IG
-	recursive_split(root, 5)
-	print(node_collection)
+	recursive_split(root, 6, min_size=100)
+	
 	make_tree(node_collection)
-	draw_tree_graphviz(node_relation_list)
+	draw_tree_graphviz(node_relation_list, node_collection)
+	print('\n', [w[3] for w in node_collection],'\n', len(node_collection), '\n')
