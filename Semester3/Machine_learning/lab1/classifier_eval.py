@@ -4,12 +4,7 @@ import collections
 from collections import defaultdict
 import argparse
 import arff #https://pypi.python.org/pypi/liac-arff
-import copy
 
-import math
-import numpy as np                        # np.log, np.log2
-from scipy import stats
-import pandas as pd
 
 from draw_tree_v2 import *
 
@@ -54,8 +49,25 @@ def read_model(train_model):
 	    node_collection, node_relation_list = data
 	return node_collection, node_relation_list
 
+def classify(raw_data, nd, nr, mother_dict = dict(), order=0):
+
+	left, right = list(), list()
+	parent, child, attr, sp = nr[order]
+
+	if mother_dict['groups'] != {}:
+		left, right = node['groups']
+	del(node['groups'])
+
+	for line in raw_data:
+		if line[int(attr[-1])-1] <= sp :left.append(line)
+		else :							 right.append(line)
+		
+			if parent=child-1 : classify(left, order=order+1)
+			else: 				classify(right,order=order+1 )
+
+	return {'groups': (left, right)}
 
 if __name__ == "__main__":
 	data = read_arff(args.test)
 	node_collection, node_relation_list = read_model(args.train_model)
-	print(node_collection, node_relation_list)
+	print(node_collection, '\n\n', node_relation_list)
