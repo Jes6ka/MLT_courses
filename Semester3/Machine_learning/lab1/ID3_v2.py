@@ -194,7 +194,7 @@ def to_terminal(group):
 	global stamp, node_collection, terminal_collection
 	#if not node_colletor : node_collection.append((attr, sp, sp_v, stamp+1))
 	outcomes = collections.Counter([row[-1] for row in group])
-	node_collection.append(( (outcomes.most_common(), outcomes), 'terminal', -7777, stamp, outcomes))
+	node_collection.append(( (outcomes.most_common(1)[0][0], outcomes), 'terminal', -7777, stamp, outcomes))
 	terminal_collection.append(group)
 	print("-=-=-=-to_terminal-=-=-=-=location: ", stamp)
 	#print(outcomes, max(outcomes, key=outcomes.count))
@@ -233,18 +233,22 @@ def recursive_split(node, max_depth, min_size=50, depth=1, off_set_percent=5):
 		recursive_split(node['right'], max_depth, depth=depth+1)
 
 
-	# node['left'] = node_split(left)
-	# recursive_split(node['left'], max_depth, )
-	
-	# # process right child
-	# node['right'] = node_split(right)
-	# recursive_split(node['right'], max_depth, depth=depth+1)
+def save_tree_model(file_name, node_collection, node_relation_list):
+	import pickle
+	with open(file_name, 'wb') as f:
+		pickle.dump((node_collection, node_relation_list), f, pickle.HIGHEST_PROTOCOL)
+	return True
 
 if __name__ == "__main__":
 	data = read_arff(args.train)
 	root = node_split(data) # attr, sp, each_IG
-	recursive_split(root, 6, min_size=100)
-	
-	make_tree(node_collection)
+	recursive_split(root, 5, min_size=100)
+
+	node_collection, node_relation_list = make_tree(node_collection)
+
+	save_tree_model(args.tree, node_collection, node_relation_list)
+
 	draw_tree_graphviz(node_relation_list, node_collection)
 	print('\n', [w[3] for w in node_collection],'\n', len(node_collection), '\n')
+
+#python ID3_v2.py exp1_train.arff ex1_train.model
