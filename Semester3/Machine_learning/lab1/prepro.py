@@ -184,9 +184,14 @@ if __name__ == "__main__":
     print(len(obj_train.final_list))
     print(len(obj_test.final_list))
 
+    feature5(annotated_sents)
+    
     obj_train.extract_attr()
     obj_train.save_to_arff(train=True)
     obj_test.extract_attr()
     obj_test.save_to_arff(test=True)
     #print(vars(test), dir(test))
     print("this is svd ", args.svd, "\nthis is novocab", args.novocab)
+
+#python prepro.py austen-persuasion.txt milton-paradise.txt --train exp1_train.arff --exp2_test.arff --testpercent 20
+
