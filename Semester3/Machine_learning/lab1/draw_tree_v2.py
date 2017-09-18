@@ -52,7 +52,7 @@ def make_tree(node_collection):
   try : fill_nodes()
   except : pass
   print('\n',node_relation_list,'\n')
-
+  return(node_collection, node_relation_list)
 
 def draw_tree_graphviz(node_relation_list, node_collection):
     from graphviz import Digraph
