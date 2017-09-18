@@ -7,10 +7,11 @@ import collections
 from collections import defaultdict
 
 #import nltk
+import nltk
 from nltk.corpus import stopwords
-
-#scikit-learn
-from sklearn.metrics import confusion_matrix #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
+from nltk import pos_tag
+from nltk import word_tokenize
+from scipy import stats
 
 #========================== import Module ==========================#
 
@@ -18,17 +19,11 @@ from sklearn.metrics import confusion_matrix #http://scikit-learn.org/stable/mod
 
 #========================== Constant ==========================#
 # tag - start symbol 
-start_symbol = "start"
-end_symbol = "end"
-T = 1#len(tag_counter)
-V = 1#len(word_counter)
-A = 0.01
 unseen_word_dict = {}
 author_word_dictionary = defaultdict(list)
 word_in_sent = []           # defaultdict(list) #looks like, 
 #defaultdict is not dict, cannot be re-called.
-
-track_attr_num = 1
+NUM_OF_COMMON = 50
 stops = set(stopwords.words('english'))
 punctuation = ['.', ',', '\/', '\'', '"', '?', '!', '@', '#', '$', '-', '--', '...', '[', ']', '{', '}', ':', ';', '/', ',"', '."', "!\""]
 
@@ -119,23 +114,24 @@ def feature2(annotated_sents):
 #author_word_dictionary : {'author1' : [word1, word2, word3,...])]
 #  annotated_sents = [('a', "This is glory"), ('b', "sent3"), ...]
 def feature3(annotated_sents):
+    #POS tag relation score.
     #tokenize(annotated_sents) # <== already excuted before in feature1, or just put it in class function
     feature3_list = []
     for author, sent in word_in_sent:
-        feature3_list.append((author, 9999))
-    
-    # counter=collections.Counter(author_word_dictionary['austen-persuasion.txt'])
-    # print(counter.most_common(50))
-    # counter=collections.Counter(author_word_dictionary['milton-paradise.txt'])
-    # print(counter.most_common(50))
-    
-    # punt_removed_dict = remove_punct(author_word_dictionary)
-    # counter=collections.Counter(punt_removed_dict['austen-persuasion.txt'])
-    # print(counter.most_common(50))
-    # counter=collections.Counter(punt_removed_dict['milton-paradise.txt'])
-    # print(counter.most_common(50))
+        # score_DESCRIBE       = 0   
+        # score_NOUN           = 2         #in order to avoid zero division, smoothing
+        # score_MODAL_ETC      = 0
+        # tagged_words = nltk.pos_tag(sent)
+        # #tagged_words = [('This', 'DT'), ('is', 'VBZ'), ('glory', 'JJ')]
+        # for word, tag in tagged_words:
+        #     if tag == 'JJ' or tag=='JJR' or tag=='JJS' or tag=='RB' or tag=='RBS' or tag=='EX': score_DESCRIBE +=1
+        #     if tag == 'NN' or tag=='NNP' or tag=='NNS' or tag=='PRP' : score_NOUN +=1
+        #     if tag == 'MD' or tag=='CC' or tag=='UH' : score_MODAL_ETC +=3
 
-    #print(author_word_dictionary['austen-persuasion.txt'][:40])
+        # combined_score = (score_DESCRIBE/score_NOUN)+score_MODAL_ETC
+        #feature3_list.append((author, round(combined_score, 4) ))
+        feature3_list.append((author, 9999))
+
     return feature3_list
 
 def feature4(annotated_sents):
@@ -148,6 +144,53 @@ def feature4(annotated_sents):
         feature4_list.append((author, score))
 
     return feature4_list
+
+#author_word_dictionary : {'author1' : [word1, word2, word3,...])]
+def feature5(annotated_sents):
+
+    voca_dict_flat = [a for b in author_word_dictionary.values() for a in b]
+    voca_dict_freq = collections.Counter(voca_dict_flat)
+    most_common_words = [w for w, freq in voca_dict_freq.most_common(NUM_OF_COMMON)]
+
+    for author, words in author_word_dictionary.items():
+        author_word_dictionary[author] = (collections.Counter(words)).most_common(NUM_OF_COMMON)
+    
+    # author_word_dictionary : {'author1' : [('the',4232), ('it',2321)...}}
+    linked_to_whole_voca = []
+
+    for author, words_list in author_word_dictionary.items():
+        temp=[]
+        for common_voca in most_common_words:
+            find = False
+            for author_word, author_word_freq in words_list:
+                if common_voca == author_word:
+                    temp.append((common_voca, author_word_freq))
+                    find = True
+            if not find : temp.append((common_voca, 0))
+        
+        linked_to_whole_voca.append(temp)
+
+    print(most_common_words, '\n\n',author_word_dictionary['austen-persuasion.txt'], '\n\n', linked_to_whole_voca[1], '\n\n')
+    print(len(most_common_words), len(author_word_dictionary), len(linked_to_whole_voca[0]))
+
+    
+
+    for author_distribution in linked_to_whole_voca:
+
+        d = distribution = [n for w,n in author_distribution]
+        rdd = rev_distribution_data = d[::-1]
+        dd = []
+        for v in rdd:
+            for i in range(NUM_OF_COMMON):
+                dd += [v]*(i+1)
+        print(len(dd), stats.kurtosis(dd), '\t', stats.skew(dd))
+        #11.77  3.05 => * => 33
+        #29.26  5.14 => * => 150
+        #4.61   2.2  => * => 8.8
+
+
+    return feature5_list
+
 
 class attributes_collection():
     """
@@ -163,8 +206,8 @@ class attributes_collection():
 
         self.features = ['punct_sentence_ratio',
                           '#_of_long_words',
-                          'Test_attribute3',
-                          'Test_attribute4']
+                          'pos_tag_relation_score',
+                          '#_of_stop_words']
 
         tokenize(annotated_sents) #for feature1, 2 +
     #sent1 : [aut1, [13, 5133, 0.11]]
