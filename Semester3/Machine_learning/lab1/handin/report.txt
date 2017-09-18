@@ -1,0 +1,8 @@
+
+First. Selecting Features.
+
+selecting features was most important part that decides perfomance of classifier.
+Here's What I chose.
+1. sentencelength-punctation ratio. 
+I mixed it together because, 
+
