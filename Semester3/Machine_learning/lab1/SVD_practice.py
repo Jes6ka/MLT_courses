@@ -1,7 +1,8 @@
 #get singular value
 from numpy.linalg import svd
 from scipy.linalg import svd
-
+from scipy.sparse.linalg import svds
+from sklearn.utils.extmath import randomized_svd
 a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
 svdvals(a)
@@ -72,4 +73,17 @@ for sent in sents:
     whole_voca.append(each_sent_voca)
     
 print(whole_voca)
+
+
+
 	
+from sklearn.utils.extmath import randomized_svd
+a = [[1,2,3],[2,3,4],[5,1,2]
+a = np.array(a)
+
+U, Sigma, VT = randomized_svd(X, 
+                              n_components=15,
+                              n_iter=5,
+                              random_state=None)
+     
+#https://stackoverflow.com/questions/31523575/get-u-sigma-v-matrix-from-truncated-svd-in-scikit-learn
