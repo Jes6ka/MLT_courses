@@ -58,7 +58,6 @@ def predict(one_line, node_relation_list, node_collection, flag=0):
 		predicted_class.append(node_collection[flag][0][0])
 		return node_collection[flag][0][0]
 
-
 	if one_line[int(attr[-1])-1] <= sp:	#if it's small
 		#print("-----flag@@-----",flag, parent, child, attr, sp)
 		predict(one_line, node_relation_list, node_collection, flag=child)
