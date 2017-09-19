@@ -184,8 +184,8 @@ if __name__ == "__main__":
     print(len(obj_train.final_list))
     print(len(obj_test.final_list))
 
-    feature5(annotated_sents)
-    
+    #eature5(annotated_sents)
+
     obj_train.extract_attr()
     obj_train.save_to_arff(train=True)
     obj_test.extract_attr()
@@ -194,4 +194,10 @@ if __name__ == "__main__":
     print("this is svd ", args.svd, "\nthis is novocab", args.novocab)
 
 #python prepro.py austen-persuasion.txt milton-paradise.txt --train exp1_train.arff --exp2_test.arff --testpercent 20
+#python prepro.py austen-persuasion.txt milton-paradise.txt chesterton-ball.txt --train exp1_train.arff --exp2_test.arff --testpercent 20
+#python prepro.py austen-persuasion.txt milton-paradise.txt chesterton-ball.txt --train exp1_train.arff --exp2_test.arff --testpercent 20 --novocab
+#python prepro.py austen-persuasion.txt milton-paradise.txt chesterton-ball.txt --train exp1_train.arff --exp2_test.arff --testpercent 20 --svd 20
+#python prepro.py austen-persuasion.txt milton-paradise.txt chesterton-ball.txt whitman-leaves.txt --train exp1_train.arff --exp2_test.arff --testpercent 20 --svd 20
+
+
 
