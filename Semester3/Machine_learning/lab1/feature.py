@@ -13,6 +13,8 @@ from nltk import pos_tag
 from nltk import word_tokenize
 from scipy import stats
 
+import time
+from sklearn.utils.extmath import randomized_svd
 #========================== import Module ==========================#
 
 
@@ -23,7 +25,9 @@ unseen_word_dict = {}
 author_word_dictionary = defaultdict(list)
 word_in_sent = []           # defaultdict(list) #looks like, 
 #defaultdict is not dict, cannot be re-called.
-NUM_OF_COMMON = 50
+NUM_OF_COMMON_WORDS = 1000
+NUM_OF_COMMON_TAGS  = 500
+
 stops = set(stopwords.words('english'))
 punctuation = ['.', ',', '\/', '\'', '"', '?', '!', '@', '#', '$', '-', '--', '...', '[', ']', '{', '}', ':', ';', '/', ',"', '."', "!\""]
 
@@ -74,7 +78,7 @@ def remove_stopword(author_word_dictionary):
 #########################################################################################
 
 #  annotated_sents = [('a', "This is glory"), ('b', "sent3"), ...]
-def feature1(annotated_sents):
+def feature1(annotated_sents, svd=0):
     """ punct_sentence_ratio  : len(sent)/#_of_punctuation"""
 
     feature1_list = []
@@ -87,7 +91,7 @@ def feature1(annotated_sents):
 
 #word_in_sent : [(author, [word1, word2, word3...]), (aut2, [w1, w2...])]
 
-def feature2(annotated_sents):
+def feature2(annotated_sents, svd=0):
     """ # of long words"""
 
     #tokenize(annotated_sents)
@@ -113,82 +117,79 @@ def feature2(annotated_sents):
 
 #author_word_dictionary : {'author1' : [word1, word2, word3,...])]
 #  annotated_sents = [('a', "This is glory"), ('b', "sent3"), ...]
-def feature3(annotated_sents):
-    #POS tag relation score.
-    #tokenize(annotated_sents) # <== already excuted before in feature1, or just put it in class function
-    feature3_list = []
-    for author, sent in word_in_sent:
-        # score_DESCRIBE       = 0   
-        # score_NOUN           = 2         #in order to avoid zero division, smoothing
-        # score_MODAL_ETC      = 0
-        # tagged_words = nltk.pos_tag(sent)
-        # #tagged_words = [('This', 'DT'), ('is', 'VBZ'), ('glory', 'JJ')]
-        # for word, tag in tagged_words:
-        #     if tag == 'JJ' or tag=='JJR' or tag=='JJS' or tag=='RB' or tag=='RBS' or tag=='EX': score_DESCRIBE +=1
-        #     if tag == 'NN' or tag=='NNP' or tag=='NNS' or tag=='PRP' : score_NOUN +=1
-        #     if tag == 'MD' or tag=='CC' or tag=='UH' : score_MODAL_ETC +=3
-
-        # combined_score = (score_DESCRIBE/score_NOUN)+score_MODAL_ETC
-        #feature3_list.append((author, round(combined_score, 4) ))
-        feature3_list.append((author, 9999))
-
-    return feature3_list
-
-def feature4(annotated_sents):
+def feature3(annotated_sents, svd=0):
     tokenize(annotated_sents)
-    feature4_list = []
+    feature3_list = []
     for author, word_list in word_in_sent:
         score = 0
         for word in word_list:
             if word in stops: score+=1
-        feature4_list.append((author, score))
+        feature3_list.append((author, score))
 
+    return feature3_list
+
+def feature4(annotated_sents, svd=0):
+    feature4_list = []
+    
+    voca_dict_flat = [a for b in author_word_dictionary.values() for a in b]
+    voca_dict_freq = collections.Counter(voca_dict_flat)
+    most_common_words = [w for w, freq in voca_dict_freq.most_common(NUM_OF_COMMON_WORDS)] #NUM_OF_COMMON_WORDS:1000
+ 
+    for author, word_list in word_in_sent:
+        score = []
+        word_freq_dict = dict(collections.Counter(word_list))
+
+        for n, w1 in enumerate(most_common_words):
+                try : score.append(word_freq_dict[w1])
+                except : score.append(0.1)
+        score = np.array([score])
+        if svd != 0 :
+            try : u,s,vt = randomized_svd(score, n_components = svd, n_iter=3, random_state=40)
+            except : s = -4444
+            feature4_list.append((author, sum(s)))
+        elif svd ==0 :feature4_list.append((author, np.sum(score)))
+
+    print(feature4_list[:10])
     return feature4_list
 
+
 #author_word_dictionary : {'author1' : [word1, word2, word3,...])]
-def feature5(annotated_sents):
+def feature5(annotated_sents, svd=0):
+    #POS tag relation score.
+    #tokenize(annotated_sents) # <== already excuted before in feature1, or just put it in class function
+
+    feature5_list = []
 
     voca_dict_flat = [a for b in author_word_dictionary.values() for a in b]
     voca_dict_freq = collections.Counter(voca_dict_flat)
-    most_common_words = [w for w, freq in voca_dict_freq.most_common(NUM_OF_COMMON)]
+    most_common_words = [word for word, freq in voca_dict_freq.most_common(NUM_OF_COMMON_TAGS)]
+    most_common_tags  = [tag for word, tag in nltk.pos_tag(most_common_words)]
 
-    for author, words in author_word_dictionary.items():
-        author_word_dictionary[author] = (collections.Counter(words)).most_common(NUM_OF_COMMON)
+    print('\n\nmost_common tag \n\n',set(most_common_tags))
     
-    # author_word_dictionary : {'author1' : [('the',4232), ('it',2321)...}}
-    linked_to_whole_voca = []
+    print('--extracting feature5, common tags ------start : ',time.strftime('%a %H:%M:%S'))
 
-    for author, words_list in author_word_dictionary.items():
-        temp=[]
-        for common_voca in most_common_words:
-            find = False
-            for author_word, author_word_freq in words_list:
-                if common_voca == author_word:
-                    temp.append((common_voca, author_word_freq))
-                    find = True
-            if not find : temp.append((common_voca, 0))
+    for author, word_list in word_in_sent:
+        score = []
+        tagged_list = nltk.pos_tag(word_list)
+        tag_dict = dict(collections.Counter([tag for word,tag in tagged_list]))
+
+        for n, w1 in enumerate(most_common_words):
+                try : score.append(tag_dict[w1])
+                except : score.append(0)
         
-        linked_to_whole_voca.append(temp)
+        score = np.array([score])
+        if svd != 0 : 
+            #print('----svd is ---', svd)
+            try : u,s,vt = randomized_svd(score, n_components = svd, n_iter=3, random_state=40)
+            except : s = -5555
+            feature5_list.append((author, sum(s)))
+        elif svd ==0 :feature5_list.append((author, np.sum(score)))
 
-    print(most_common_words, '\n\n',author_word_dictionary['austen-persuasion.txt'], '\n\n', linked_to_whole_voca[1], '\n\n')
-    print(len(most_common_words), len(author_word_dictionary), len(linked_to_whole_voca[0]))
-
-    
-
-    for author_distribution in linked_to_whole_voca:
-
-        d = distribution = [n for w,n in author_distribution]
-        rdd = rev_distribution_data = d[::-1]
-        dd = []
-        for v in rdd:
-            for i in range(NUM_OF_COMMON):
-                dd += [v]*(i+1)
-        print(len(dd), stats.kurtosis(dd), '\t', stats.skew(dd))
-        #11.77  3.05 => * => 33
-        #29.26  5.14 => * => 150
-        #4.61   2.2  => * => 8.8
+    print('--extracting feature5, common tags ------finished : ',time.strftime('%a %H:%M:%S'))
 
 
+    print('feature5 list ------\n\n',feature5_list[:20], '\t', len(feature5_list))
     return feature5_list
 
 
@@ -204,21 +205,36 @@ class attributes_collection():
         #feature_list : [f1, f2...]
         self.final_list   = []
 
-        self.features = ['punct_sentence_ratio',
-                          '#_of_long_words',
-                          'pos_tag_relation_score',
-                          '#_of_stop_words']
-
+        if args_obj.novocab :
+            self.features = ['punct_sentence_ratio',
+                              '#_of_long_words',
+                              '#_of_stop_words']
+        else : 
+            if args_obj.svd == 0:
+                self.features = ['punct_sentence_ratio',
+                                  '#_of_long_words',
+                                  '#_of_stop_words',
+                                  '#_of_common_word_used',
+                                  '#_of_common_tags']
+            elif args_obj.svd != 0:
+                self.features = ['punct_sentence_ratio',
+                                  '#_of_long_words',
+                                  '#_of_stop_words',
+                                  'svd_common_word_used',
+                                  'svd_commpn_tags']
         tokenize(annotated_sents) #for feature1, 2 +
     #sent1 : [aut1, [13, 5133, 0.11]]
     #sent2 : [aut2, [15, 2929, 0.02]]
 
     #Total : [  [aut1, [13, 5133, 0.11]],
     #           [aut2, [15, 2929, 0.02]] ......]
-    def extract_attr(self, svd=0, novocab=False): # [('aut1', 3), ('aut2', 1)...]
+    def extract_attr(self): # [('aut1', 3), ('aut2', 1)...]
         
         for i in range(len(self.features)):
-            each_feature_list = eval("feature"+str(i+1))(self.sents)
+            if self.svd != 0:
+                each_feature_list = eval("feature"+str(i+1))(self.sents, svd=self.svd)
+            elif self.svd == 0:
+                 each_feature_list = eval("feature"+str(i+1))(self.sents)
 
             #print(each_feature_list[:10])
 
