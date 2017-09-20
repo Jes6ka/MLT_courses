@@ -7,6 +7,7 @@ from sklearn.decomposition import TruncatedSVD
 import numpy as np
 
 #http://matpalm.com/lsa_via_svd/eg1.html
+#http://matpalm.com/lsa_via_svd/eg2.html
 c1 = [[2,2,0,0],[2,2,0,0],[3,3,0,0],[0,0,2,2],[0,0,1,1],[0,0,2,2]]
 c2 = [[87,99,76,0],[24,23,0,20],[34,33,98,22],[0,44,2,2],[0,0,1,1],[0,0,2,2]]
 
@@ -29,6 +30,8 @@ print(svd1.explained_variance_ratio_)
 print(svd1.explained_variance_)
 print(svd1.singular_values_) 
 print(svd1.fit_transform(c3))
+
+#svd1.inverse_transform(svd1) this not works.
 k = svd1.fit_transform(c3)
 print(svd1.inverse_transform(k))
 
@@ -52,7 +55,7 @@ print(svd1.inverse_transform(k))
 """
 
 v = np.transpose(vt)
-VS = np.dot(v,s)
+VS = np.dot(v,s)# np.round(v*s, 2) is proper matrix
 print(v, '\n\n', s, '\n\n',np.dot(v,s), 
       '\n\n',np.round(v*s, 2))
 US = np.round(u*s, 2)
