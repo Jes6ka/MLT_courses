@@ -1,6 +1,6 @@
 ### Use API to get Temperature info.
 
-#example in Python3
+##example in Python3
 
 from urllib.request import urlopen as Request
 import json
