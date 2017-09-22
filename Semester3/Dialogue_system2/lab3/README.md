@@ -11,15 +11,15 @@ response = Request(url)
 
 # 
 
-data = response.read()
 
-# data = b'{coord':....} binrary data
+data = b'{coord':....} binrary data
+# data = response.read()
 
 
  
-data = data.decode('utf-8')
 
-# now data is string
+ now data is string
+# data = data.decode('utf-8')
 
 
 # 
