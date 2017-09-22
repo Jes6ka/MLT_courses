@@ -3,8 +3,12 @@
 ## example in Python3
 
 from urllib.request import urlopen as Request
+
 import json
 
+from tdm.tdmlib import DeviceWHQuery 
+
+###
 url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
 
 response = Request(url)
