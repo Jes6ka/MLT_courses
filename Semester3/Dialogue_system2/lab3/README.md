@@ -15,7 +15,7 @@ data = response.read()
 #data = b'{coord':....} binrary data
 
 
-
+ 
 data = data.decode('utf-8')
 
 #now data is string
