@@ -8,12 +8,12 @@ import json
 
 from tdm.tdmlib import DeviceWHQuery 
 
-###
+### ---------------------
 url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
 
 response = Request(url)
 
-###
+### ---------------------
 
 
 data = b'{coord':....} binrary data
@@ -26,7 +26,7 @@ data = b'{coord':....} binrary data
 ### data = data.decode('utf-8')
 
 
-###
+### ---------------------
 data_dict = json.loads(data)
 
 return data_dict
