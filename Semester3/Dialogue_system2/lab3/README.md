@@ -1,4 +1,4 @@
-# Use API to get Temperature info.
+# Use API to get Temperature info with https://openweathermap.org/
 
 ## example in Python3
 
