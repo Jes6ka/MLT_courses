@@ -1,0 +1,81 @@
+############ Inner city ############
+
+# Initiation -- not necessary
+S : Where are you now?
+U : Viktoriagatan
+
+# use Default depart point
+U : how can I go Valand.
+S : Take tram number 6.
+
+# use another depart point
+U : how can I go Valand.
+S : Where are you now?
+U : Viktoriagatan
+S : Take tram number 6.
+
+# use Default depart point
+(No specific bus info given)
+U : When bus will come?
+S : Bus 6 comes in 5min,
+    Bus 8 comes in 10min,
+    tram 8 comes in 20min.
+
+(Specific bus info given)
+U : When Green bus will come?
+S : it will be arrived in 5min.
+
+
+
+
+############ Combining with weather ############
+
+(nice weather)
+U : I wanna go Valand.
+S : Weather in Gothenburg is SUNNY,
+    it's only 1 station away, you can take a walk.
+
+(Bad weather)
+U : I wanna go Valand.
+S : It's only 1 station away, but since it's rainy outside,
+    Take a tram number 6 or 8, or take a bus number 18 or 55
+
+
+
+
+############ Outside city ############
+
+(Train) - Check departure
+U : When will train go?
+S : Which one you are talking about?
+U : I mean to Trollhattan.
+S : Are you in Gothenburg, right?
+U : Yes.
+
+S : earlist one will go in 30min, 4:30pm,
+    wanna hear next one?
+U : Yes.
+S : Next train to Trollhattan will arrive at 5:30pm and 6 pm
+    wanna hear more?
+U : No, it's okay
+S : Okay.
+
+
+(Train) - Check arrivals
+U : When train will arrive?
+S : Which one you are talking about?
+U : I mean from Trollhattan.
+S : Are you in Gothenburg, right?
+U : No.
+
+S : Where are you now?
+U : Uddevalla.
+
+S : earlist one will arrive in 30min, 4:30pm,
+    wanna hear next one?
+U : Yes.
+S : Next train from Trollhattan will arrive at 5:30pm and 6 pm
+    wanna hear more?
+U : No, it's okay
+S : Okay.
+
