@@ -1,0 +1,348 @@
+\documentclass[a4,landscape]{seminar}
+\usepackage[utf8x]{inputenc}
+\usepackage[pdftex]{graphicx}
+\usepackage{fancybox}
+\usepackage{url}
+% \usepackage{sem-a4}
+
+\pdfcompresslevel=9
+\pdfpageheight=8.27truein
+\pdfpagewidth=11.69truein
+\pdfhorigin=1truein
+\pdfvorigin=1truein
+\slideheight 14truein
+\slidewidth 22truein
+
+\newpagestyle{roberts}
+        {\thepage\hfil Introduction to the Language Technology Lab autumn 2017\hfil\hfil\hfil Fei Roth \texttt{fei.roth@gu.se}\hfil}{}
+\pagestyle{roberts}
+\slideframe{oval}
+
+\begin{document}
+% === Slide 1 ===
+\begin{slide}
+  {\Large Contents}
+  \begin{itemize}
+  \item General Introduction to the Computer Lab Environment
+  \item macOS Sierra Orientation
+    \begin{itemize}
+    \item Desktop environment, File Handling, Applications, and Keyboard
+    \end{itemize}
+  \item Terminal and the Command-Line Interface, \emph{CLI}
+  \item Emacs, \emph{the} text editor, Lisp interpreter, compiler, debugger, ...
+  \end{itemize}
+\end{slide}
+% === Slide 2 ===
+\begin{slide}
+  {\Large Computer Lab Environment}
+  \begin{itemize}
+  \item Access to the Lab
+    \begin{itemize}
+    \item Access to the lab is granted Monday-Sunday between 07:30 am to
+     09:00 pm. The room should be empty by 09:30 pm, when the alarm is
+      automatically switched on. The computer lab is closed on legal
+      holidays. Please report lost GU keycards to the FLoV
+      administration as quickly as possible.
+    \end{itemize}
+  \item Computer Environment
+    \begin{itemize}
+    \item 15 Apple iMac workstations for students, 1 workstation for
+      the teacher
+    \item 24 seats within workstation reach, where 6 computers can only
+      be used by one student (some extra chairs are available in the room)
+    \item 0 printers (multifunction devices and network printers)
+      \begin{itemize}
+      \item Different types of printers can be found in all university buildings.
+      \item Students can buy printer quota at the service
+        centers. Please observe that every print-out and copy is charged. Color
+        prints are more expensive.
+      \item It is recommended to check the printing settings before printing.
+      \item PCClient (software) and GUprint (print and copy service)
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{slide}
+% === Slide 3 ===
+\begin{slide}
+  {\Large Computer Lab Environment (cont.)}
+  \begin{itemize}
+  \item Policies and rules
+    \begin{itemize}
+    \item Please observe that the common regulations for the use of
+      the university’s computer network apply.
+    \item For everybody's convenience, please do not eat or drink in
+      the computer lab. For coffee breaks, lunch, etc. you can use the
+      student lounges which are available in this building
+      (Eklandagatan 86).
+    \item Non-study activities like private gaming are not allowed in
+      the computer lab.
+    \item Class activities in the lab always have priority. Apart from
+      that you are encouraged to use the lab for assignment work etc. as
+      much as possible.
+    \item WiFi (Eduroam and GoteborgsUniversitet) as well as extra
+      power sockets are available in the computer lab, in case you
+      need to use your private computer alongside the lab computers.
+    \end{itemize}
+  \end{itemize}
+\end{slide}
+% === Slide 4 ===
+\begin{slide}
+  {\Large Apple macOS Sierra}
+  \begin{itemize}
+  \item Accounts and Login
+    \begin{itemize}
+    \item To be able to login, please use your GU student account, \texttt{gus•••••}.
+    \item There is no disk quota for single users. Please use the
+      available storage space with
+      care and do not store large files and data unnecessarily.
+    \item Copyrighted material obtained illegally must NOT be stored
+      on the computers.
+    \item Your student account will be deleted, if you do not register
+      for the MLT program's courses for more than two consecutive semesters.
+    \end{itemize}
+  \item Apple Menu\\[1ex]
+    Where you manage miscellaneous features
+    \begin{itemize}
+    \item Logging out, pls logout after a session as you can not lock the screen.
+    \item System Preferences, e.g.
+      \begin{itemize}
+      \item Audio I/O settings, pls use these and do not unplug the headsets.
+      \item Language settings (...)
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  \clearpage{}
+  \begin{itemize}
+  \item Keyboard
+    \begin{itemize}
+    \item The command key, \texttt{cmd}, used for common shortcuts instead of % , ⌘, 
+      ctrl on a PC.
+    \item Common character can be hard to find as they are not printed
+      on the keyboard, notably \texttt{\{}, \texttt{\}}, \texttt{[}, \texttt{]}, \texttt{|}, \textbackslash, and \textasciitilde. Open the keyboard viewer to get help finding the keys.
+    \end{itemize}
+  \item Finder\\[1ex]
+    Where you do your main filesystem management, launching applications, etc. Works almost like Windows Explorer.
+    \begin{itemize}
+    \item Local folders\\[1ex]
+      Folders on your account that is stored on the lab computer
+      currently in use. The contents of these folders can be cleaned
+      at any time, and will not be available if the user log in to
+      another lab computer. The local folders are
+      \clearpage{}
+      \begin{itemize}
+      \item Downloads,
+      \item Dropbox,
+      \item Movies,
+      \item Music, and
+      \item Pictures.
+      \end{itemize}
+    \item Documents folder\\[1ex]
+      Place all your important files/folders in this folder as it is
+      guaranteed to be backed up. Saving files on the Desktop is not
+      safe!
+    \item Get info, \texttt{cmd-I}\\[1ex]
+      In the info window you can change permissions for the
+      file/folder and change default program for opening these kind of
+      files.
+    \end{itemize}
+    \clearpage{}
+  \item Dock\\[1ex]
+    The dock is divided into two part, on the right-hand-side you have
+    shortcuts to folders, minimised windows, and the trash can. On the
+    left-hand-side you have shortcuts to your applications.\\\\
+    Add folders and applications by draging them from a Finder window.
+    Remove folders and applications from the dock by draging them from
+    the Dock..
+  \item Backups\\[1ex]
+    Again -- only the Documents folder is guaranteed to be backed up!
+    The backups are stored in a hidden folder, \texttt{.snapshot}, and
+    it can be viewed in Finder by
+    \begin{itemize}
+    \item opening the folder where the lost file was,
+    \item clicking \texttt{Go to folder\dots} in the Finder's \texttt{Go} menu\\[1ex]
+      Go → Go to folder\dots
+    \item write \texttt{.snapshot} in the pop-up window, and hit \texttt{<enter>}.
+    \end{itemize}
+    \clearpage{}
+  \item Support\\[1ex]
+    Report problems in the lab to your teacher or Fei Roth (room T224,
+    Olof Wijksgatan 6, mobile phone: 0766186784). Also, if possible, email problems to\\[1ex]
+    \texttt{fei.roth@gu.se}\\\\
+    We do not support your private computers.
+  \end{itemize}
+\end{slide}
+\begin{slide} 
+  {\Large Terminal -- Command-Line Interface, \emph{CLI}}\\[1ex]
+  In the terminal application you have a text shell, \emph{bash}, where you
+  can enter commands, aka the command-line interface.
+  \begin{itemize}
+  \item Commands and navigating the commandline
+    \begin{itemize}
+    \item The prompt, where you write your commands\\[1ex]
+      \texttt{COMPUTERNAME:CWD USERNAME\$}
+    \item Command format\\[1ex]
+      \texttt{COMMANDNAME ARG1 ARG2 ARG3 \dots}\\[1ex]
+      \texttt{ARG}s can be optional, \texttt{ARG}s can eg be options
+      (aka switches/flags), filenames, or \dots\\[1ex]
+      \texttt{ls -l filename.txt}
+      \clearpage{}
+    \item Editing and navigating the commandline
+      \begin{itemize}
+      \item After finishing a commandline, hit \texttt{<enter>} to execute
+      \item Keyboard shortcuts for editing on the command line\\[1ex]
+        \begin{tabular}{|r|l|}
+          \hline
+          \multicolumn{2}{|l|}{Editing, \texttt{C-} = ctrl key }\\\hline\hline
+          \texttt{→} or \texttt{C-f} & forward character\\
+          \texttt{←} or \texttt{C-b} & back character\\
+          \texttt{C-e} & go to end of line\\
+          \texttt{C-a} & go to beginning of line\\
+          \texttt{C-d} & delete character\\
+          \texttt{C-k} & kill all following char\\
+          \texttt{C-u} & discard line\\
+          \texttt{C-w} & remove last word typed\\
+          \texttt{C-l} & clear screen\\\hline
+          \end{tabular}
+          \begin{tabular}{|r|l|}
+          \hline
+          \multicolumn{2}{|l|}{History, \texttt{C-} = ctrl key }\\\hline\hline
+          \texttt{↓} or \texttt{C-n} & next line\\
+          \texttt{↑} or \texttt{C-p} & previous line\\\hline
+          \multicolumn{2}{l}{}\\\hline
+          \multicolumn{2}{|l|}{Misc, \texttt{C-} = ctrl key }\\\hline\hline
+          \texttt{C-c} & abort current command\\
+          \texttt{<TAB>} & tab-completion\\\hline
+        \end{tabular}
+      \end{itemize}
+      \clearpage{}
+    \item Man pages -- online manual in the terminal\\[1ex]
+      To read a man page for some command, issue the command\\[1ex]
+      \texttt{man \textsl{COMMAND}}\\[1ex]
+      Eg \texttt{man man} for reading the man page for the man command. A man page can contain numerous sections, a few of interest are
+      \begin{itemize}
+      \item \texttt{NAME}, name of comand followed by a short description
+      \item \texttt{SYNOPSIS}, how to use and what options and args are expected
+      \item \texttt{DESCRIPTION}, longer description of the command
+      \item \texttt{OPTIONS}, what an option does (sometimes in the description section)
+      \item \texttt{EXAMPLES}, examples usages
+      \end{itemize}
+      \clearpage{}
+      Navigating the man pages, default keys
+        \begin{tabular}{|r|l|}
+          \hline
+          $<$SPACE$>$ or $<$PgDn$>$ & page down\\
+          b or $<$PgUp$>$ & page up\\
+          q & exit the man page (takes you back to bash)\\\hline
+        \end{tabular}
+        \\\\
+        Eg. the command \texttt{say} will convert text to speech and output it the built-in MacOS X
+        tts engine\\[1ex]
+        \texttt{say Hello, MLT-students}\\[1ex]
+        using the man for says\\[1ex]
+        \texttt{man say}\\[1ex]
+        one can eg find out how to use another voice\\[1ex]
+        \texttt{say -v Vicki Hello, masterstudents}\\
+        \texttt{say --voice=Vicki Hello, master students}
+    \end{itemize}
+    \clearpage{}
+  \item File management in the shell
+    \begin{itemize}
+    \item Filenames\\[1ex]
+      \texttt{NAME.EXT}\\[1ex]
+      where \texttt{NAME} is the basename and \texttt{.EXT} indicates
+      the content type of the file, eg \texttt{.txt}, \texttt{.py} etc.\\\\
+      N.B. file and folder names are, per default, case insensitive on MacOS X, eg \texttt{FileName.TXT} = \texttt{filename.txt} when in the same folder
+    \item The filetree\\[1ex]
+      Viewing the filesystem as a reversed tree, root at top. TODO: graph \\\\
+      N.B. a folder is now known as a \emph{directory} when working in the terminal!
+      \clearpage{}
+    \item Pathnames, Absolute vs Relative\\[1ex]
+      A path is used to specify a unique location in a filesystem. The path point to a location by following the filetree using a slash, \texttt{/}, to delimit each item, folder or file in the tree.\\\\
+      An absolute path reference includes all levels from root, eg:\\[1ex]
+      \texttt{/Users/gus•••••/Documents/file.txt}\\
+      \texttt{/opt/mlt/courses/labintro/}\\[1ex]
+      A relative path reference points to a file from the current working directory, eg\\if the current working directory is \texttt{/Users/gus•••••} to the same file, \\ \texttt{file.txt}, above with:\\[1ex]
+      \texttt{Documents/file.txt}\\
+      \texttt{./Documents/file.txt}\\
+      \texttt{../gus•••••/Documents/file.txt}\\[1ex]
+      \texttt{..} denotes on level up and\\
+      \texttt{.} denotes this level
+    \item Shortcuts and wildcards\\[1ex]
+      Shortcuts and variables may be expanded to paths, eg the following also points to the above file, \texttt{file.txt}\\[1ex]
+      \texttt{\textasciitilde/Documents/file.txt}\\
+      \texttt{\$HOME/Documents/file.txt}\\[1ex]
+      as both the shortcut \texttt{\textasciitilde}~and the variable \texttt{\$HOME} expands to \texttt{/Users/gus•••••}\\\\
+      With the wildcard \texttt{*} you can match any number of unknown characters in eg\\[1ex]
+      \texttt{\textasciitilde/*/file.txt}\\[1ex]
+      points to the same file as above as \texttt{*} here matches Documents. The path\\[1ex]
+      \texttt{/Users/gus•••••/Documents/*.txt}\\[1ex]
+      points to all files in the Documents directory ending with \texttt{.txt}.
+      \clearpage{}
+    \item Listing files and directories\\[1ex]
+      \begin{tabular}{|l|l|}
+        \hline
+        \texttt{ls} & list contents in directory\\
+        \texttt{ls -l} & list contents in directory with long format\\
+        \texttt{ls -l PATH} & list \texttt{PATH} with long format\\\hline
+      \end{tabular}
+    \item Walking the filetree\\[1ex]
+      \begin{tabular}{|l|l|}
+        \hline
+        \texttt{pwd} & print current working direcotry\\
+        \texttt{cd} & change working directory to home directory, \textasciitilde\\
+        \texttt{cd PATH} & change working diretory to \texttt{PATH}\\\hline
+      \end{tabular}
+    \item Create and remove directories\\[1ex]
+      \begin{tabular}{|l|l|}
+        \hline
+        \texttt{mkdir PATH} & make directory \texttt{PATH}\\
+        \texttt{rmdir PATH} & remove directory \texttt{PATH}\\\hline
+      \end{tabular}
+      \clearpage{}
+    \item Copy, move, and remove files
+      \begin{tabular}{|l|l|}
+        \hline
+        \texttt{cp PATH1 PATH2} & copy \texttt{PATH1} to \texttt{PATH2}\\
+        \texttt{cp -r PATH1 PATH2} & recursive copy of \texttt{PATH1} to \texttt{PATH2}\\
+        \texttt{mv PATH1 PATH2} & move, or rename, \texttt{PATH1} to \texttt{PATH2}\\
+        \texttt{rm PATH1} & remove \texttt{PATH1}\\\hline
+      \end{tabular}\\\\
+      Use \texttt{.} as \texttt{PATH2} with \texttt{cp} to copy files to the current working directory without changing its name, eg\\[1ex]
+      \texttt{cp /opt/mlt/courses/labintro/testing.txt .}\\[1ex]
+      will copy the file \texttt{testing.txt} here.
+    \item Misc commands\\[1ex]
+      \begin{tabular}{|l|l|}
+        \hline
+        \texttt{file PATH} & determine file type, character encoding etc\\
+        \texttt{du}   & display disk usage\\
+        \texttt{open PATH} & open files and directories\\\hline
+      \end{tabular}
+    \end{itemize}
+    \clearpage{}
+  \item Shells in shells\\[1ex]
+    Sometimes you will have to start a program that uses its own text
+    shell, having its own set of commands, e.g.
+    \begin{itemize}
+    \item the Python interpreter shell, and
+    \item the XFST interpreter shell etc.
+    \end{itemize}
+    Note the initial text and that the prompt will probably be
+    different, though navigating and editing text in these new
+    ``shells'' is often the same as described for bash above.
+
+    To exit a shell you can try \texttt{C-d} on a empty line, or
+    execute the \texttt{exit} command.
+  \end{itemize}
+\end{slide}
+\begin{slide}
+  {\Large References}\\[1ex]
+  \url{http://en.wikibooks.org/wiki/Linux_Guide/Using_the_shell}
+  \url{http://en.wikibooks.org/wiki/Linux_Guide/Linux_commands}
+  \url{https://www.linuxtrainingacademy.com/}
+\end{slide}
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
