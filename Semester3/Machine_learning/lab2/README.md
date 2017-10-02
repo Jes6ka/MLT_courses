@@ -6,10 +6,10 @@
 
 In window,
 
- install java or check java version(must be >=1.8)
- how to check : cmd >> java -version
- where it is installed : cmd >> where java
- #need this address for JAVAHOME, JAVA_HOME in system environments. go and Create, save!
+ install java or check java version(must be >=1.8)__
+ how to check : cmd >> java -version__
+ where it is installed : cmd >> where java__
+ #need this address for JAVAHOME, JAVA_HOME in system environments. go and Create, save!__
 
 Go here, https://nlp.stanford.edu/software/lex-parser.shtml 
 download parser, e.g., Download : Version 3.8.0 
