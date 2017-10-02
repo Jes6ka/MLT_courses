@@ -23,4 +23,4 @@ e.g., D:\GU_MLT\Semester_3\Machine_Learning\lab2\stanford-parser-full-2017-06-09
 - parser=StanfordParser(model_path="D:\GU_MLT\Semester_3\Machine_Learning\lab2\stanford-parser-full-2017-06-09\englishPCFG.ser.gz")
 - list(parser.raw_parse("the quick brown fox jumps over the lazy 
 
-
+![alt text](https://github.com/sungmin-yang/MLT_courses/blob/master/Semester3/Machine_learning/lab2/window_stanford_ex.JPG)
