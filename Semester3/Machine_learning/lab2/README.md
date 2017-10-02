@@ -4,8 +4,9 @@
 ### go to here
 > https://github.com/nltk/nltk/wiki/Installing-Third-Party-Software
 
-In window
-install java or check java version(must be >=1.8)
+In window,
+
+>install java or check java version(must be >=1.8)
 > how to check : cmd >> java -version
 > where it is installed : cmd >> where java  #need this address for JAVAHOME, JAVA_HOME in system environments. go and Create, save!
 
