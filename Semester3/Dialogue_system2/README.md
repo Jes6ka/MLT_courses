@@ -4,9 +4,9 @@ Go to lab.
 Go to command line
 
 ### type next lines for running or test.
-> tdm
-> tdm buld
-> tdm run eng
+> tdm <br/>
+> tdm buld<br/>
+> tdm run eng<br/>
 
 
 > Issue
