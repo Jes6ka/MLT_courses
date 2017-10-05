@@ -1,29 +1,35 @@
+
+
 ############ Inner city ############
 
-# Initiation -- not necessary
+# 1-1. No Default starting point
 S : Where are you now?
-U : Viktoriagatan
+U : [Viktoriagatan]
+S : What do you want to know?
+U : ...
 
-# use Default depart point
-U : how can I go Valand.
-S : Take tram number 6.
+# 1-2. Default starting point
+U : how can I go [Valand]. (default start point == Viktoriagatan)
+S : Take bus [6] or [7] or tram [8].
 
-# use another depart point
-U : how can I go Valand.
-S : Where are you now?
-U : Viktoriagatan
-S : Take tram number 6.
+# 1-3. New starting point
+U : how can I go [Valand]. I am in [Nordstan]
+S : Take bus [6] or [7] or tram [8].
 
-# use Default depart point
-(No specific bus info given)
+
+
+# 2. Read time table
+#use Default starting point
+
+#2-1. No specific bus info given
 U : When bus will come?
-S : Bus 6 comes in 5min,
-    Bus 8 comes in 10min,
-    tram 8 comes in 20min.
+S : [Bus 6] comes in [5min],
+    [Bus 18] comes in [10min],
+    [tram 8] comes in [20min].
 
-(Specific bus info given)
-U : When Green bus will come?
-S : it will be arrived in 5min.
+#2-2. Specific bus info given
+U : When [Green bus] will come?
+S : it will be arrived in [5min].
 
 
 
@@ -31,14 +37,14 @@ S : it will be arrived in 5min.
 ############ Combining with weather ############
 
 (nice weather)
-U : I wanna go Valand.
-S : Weather in Gothenburg is SUNNY,
-    it's only 1 station away, you can take a walk.
+U : I wanna go [Valand].
+S : Weather in [Gothenburg] is [SUNNY],
+    it's only [1] station away, [you can take a walk].
 
 (Bad weather)
-U : I wanna go Valand.
-S : It's only 1 station away, but since it's rainy outside,
-    Take a tram number 6 or 8, or take a bus number 18 or 55
+U : I wanna go [Valand].
+S : It's only [1] station away, [but since it's rainy outside],
+	Take bus [6] or [7] or tram [8].
 
 
 
@@ -78,4 +84,56 @@ S : Next train from Trollhattan will arrive at 5:30pm and 6 pm
     wanna hear more?
 U : No, it's okay
 S : Okay.
+
+
+
+
+################################################################################################
+################################################################################################
+
+
+############ Inner city ############
+
+
+# fastest way, earliest bus/tram
+S: Welcome to west traffic travel planer, what can I do for you?
+U: What is the <fastest> way to go to [G?taplatsen]?
+S: Where are you?
+U: [Vasaplatsen]
+S: The earliest tram is [Tram 2] at platform [A], it will come in [5] minutes. After [1] stop, You shall go off at [Valand], and take [Bus 52] at platform [D]. You can go off at [G?taplatsen] after [1] stop. 
+
+# arrival time
+S: Welcome to west traffic travel planer, what can I do for you?
+U: I need to arrive at [G?taplatsen] at [13:00].
+S: Where are you?
+U: [Vasaplatsen]
+S: You can take [Tram 2] at [12:45] at platform [A], after [1] stop go off at [Valand], and take [Bus 18] at [12:50] at platform [D]. You can go off at [G?taplatsen] after [1] stop. You will arrive at [12:51]. 
+
+#  searching bus/tram information 1
+S: Welcome to west traffic travel planer, what can I do for you?
+U: When will [Bus 52] come to [G?taplatsen]?
+S: Which direction are you talking about? Towards [Linn¨¦platsen] or towards [Skogome]?
+U: [Skogome]
+S: [Bus 52] towards [Skogome] is coming to platform [A] at [G?taplatsen] in [3] minutes.
+
+#  searching bus/tram information 2
+S: Welcome to west traffic travel planer, what can I do for you?
+U: When will [Bus 52] come to [G?taplatsen]?
+S: Which direction are you talking about? Towards [Linn¨¦platsen] or towards [Skogome]?
+U: I don't know.
+S: Where are you going then?
+U: [Valand].
+S: Okay, [Bus 52] towards [Skogome] is coming to platform [A] at [G?taplatsen] in [3] minutes. You can go off at [Valand] after [1] stop.
+
+# good weather + searching bus/tram information 2
+S: Welcome to west traffic travel planer, what can I do for you?
+U: When will [Bus 52] come to [G?taplatsen]?
+S: Which direction are you talking about? Towards [Linn¨¦platsen] or towards [Skogome]?
+U: I don't know.
+S: Where are you going then?
+U: [Valand].
+S: Okay, [Bus 52] towards [Skogome] is coming to platform [A] at [G?taplatsen] in [3] minutes. It is [sunny] out, if not in hurry, you can take a walk to [Valand], since it is just [1] stop.
+U: How far is [Valand] from here?
+S: It is [6] minutes walk.
+
 
